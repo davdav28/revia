@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, ArrowLeft, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,11 +39,13 @@ export function BookingFlow({
   const [service, setService] = useState<Service | null>(null);
   const [dayMs, setDayMs] = useState<number | null>(null);
   const [time, setTime] = useState<string | null>(null);
+  const router = useRouter();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     phone: "",
     email: "",
+    birthdate: "",
     smsConsent: true,
     emailConsent: false,
   });
@@ -92,6 +95,12 @@ export function BookingFlow({
       });
       if ("error" in res) {
         setError(res.error);
+        // Créneau pris entre-temps : on rafraîchit les dispos et on renvoie au choix.
+        if (/pris|disponible/i.test(res.error)) {
+          setTime(null);
+          setStep(2);
+          router.refresh();
+        }
         return;
       }
       setConfirmation({
@@ -291,6 +300,18 @@ export function BookingFlow({
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5 sm:max-w-[50%] sm:pr-1.5">
+            <Label htmlFor="b-birthdate">
+              Date de naissance <span className="text-muted">(facultatif)</span>
+            </Label>
+            <Input
+              id="b-birthdate"
+              type="date"
+              value={form.birthdate}
+              onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
+            />
           </div>
 
           <label className="text-ink flex items-start gap-3 text-sm">

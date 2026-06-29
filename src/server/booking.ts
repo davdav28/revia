@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { recomputeClientStats } from "@/lib/client-stats";
 import { normalizePhone } from "@/lib/phone";
+import { parseFlexibleDate } from "@/lib/dates";
 import { isSlotBookable, HORIZON_DAYS, type BusyInterval } from "@/lib/booking";
 import { getMessagingProvider } from "@/lib/messaging";
 
@@ -29,6 +30,7 @@ const schema = z.object({
       (v) => v === "" || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v),
       "Adresse email invalide.",
     ),
+  birthdate: z.string().trim().optional().default(""),
   smsConsent: z.boolean().default(false),
   emailConsent: z.boolean().default(false),
 });
@@ -105,6 +107,8 @@ export async function createPublicBooking(
       ? await prisma.client.findFirst({ where: { salonId: salon.id, email } })
       : null);
 
+  const birthdate = parseFlexibleDate(d.birthdate);
+
   if (!client) {
     client = await prisma.client.create({
       data: {
@@ -113,6 +117,7 @@ export async function createPublicBooking(
         lastName: d.lastName || null,
         phone,
         email,
+        birthdate,
         smsConsent: d.smsConsent,
         smsConsentAt: d.smsConsent ? now : null,
         emailConsent: d.emailConsent,
@@ -120,10 +125,11 @@ export async function createPublicBooking(
       },
     });
   } else {
-    // Met à jour les consentements si nouvellement donnés (jamais retirés ici).
+    // Met à jour consentements + date de naissance si nouvellement fournis.
     await prisma.client.update({
       where: { id: client.id },
       data: {
+        birthdate: client.birthdate ?? birthdate,
         smsConsent: client.smsConsent || d.smsConsent,
         smsConsentAt: client.smsConsentAt ?? (d.smsConsent ? now : null),
         emailConsent: client.emailConsent || d.emailConsent,
