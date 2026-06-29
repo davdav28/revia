@@ -126,8 +126,12 @@ export default async function ClientesPage({
                     <TableHead>Cliente</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Dernière visite</TableHead>
-                    <TableHead className="text-right">Visites</TableHead>
-                    <TableHead className="text-right">Panier moyen</TableHead>
+                    <TableHead className="hidden text-right sm:table-cell">
+                      Visites
+                    </TableHead>
+                    <TableHead className="hidden text-right sm:table-cell">
+                      Panier moyen
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -150,10 +154,10 @@ export default async function ClientesPage({
                       <TableCell className="text-muted">
                         {formatRelative(c.lastVisitAt)}
                       </TableCell>
-                      <TableCell className="tabular text-right">
+                      <TableCell className="tabular hidden text-right sm:table-cell">
                         {c.visitCount}
                       </TableCell>
-                      <TableCell className="tabular text-right">
+                      <TableCell className="tabular hidden text-right sm:table-cell">
                         {c.visitCount > 0
                           ? formatCents(c.averageSpendCents)
                           : "—"}

@@ -213,9 +213,11 @@ export default async function RelancesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Cliente</TableHead>
-                  <TableHead>Canal</TableHead>
+                  <TableHead className="hidden sm:table-cell">Canal</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Coût</TableHead>
+                  <TableHead className="hidden text-right sm:table-cell">
+                    Coût
+                  </TableHead>
                   <TableHead className="text-right">Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -225,7 +227,7 @@ export default async function RelancesPage() {
                     <TableCell className="text-ink font-medium">
                       {m.client.firstName} {m.client.lastName ?? ""}
                     </TableCell>
-                    <TableCell className="text-muted uppercase">
+                    <TableCell className="text-muted hidden uppercase sm:table-cell">
                       {m.channel}
                     </TableCell>
                     <TableCell>
@@ -233,7 +235,7 @@ export default async function RelancesPage() {
                         {STATUS_LABEL[m.status]}
                       </Badge>
                     </TableCell>
-                    <TableCell className="tabular text-muted text-right">
+                    <TableCell className="tabular text-muted hidden text-right sm:table-cell">
                       {m.costCents != null ? formatCents(m.costCents) : "—"}
                     </TableCell>
                     <TableCell className="text-muted text-right">

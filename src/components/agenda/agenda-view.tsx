@@ -159,7 +159,7 @@ export function AgendaView({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="border-line bg-surface flex rounded-md border p-0.5">
             {(["week", "day"] as ViewMode[]).map((v) => (
               <button
@@ -195,99 +195,106 @@ export function AgendaView({
         </div>
       </div>
 
-      {/* Calendrier */}
+      {/* Calendrier (défile horizontalement sur mobile en vue semaine) */}
       <div className="border-line bg-surface overflow-hidden rounded-lg border">
-        {/* En-têtes de jours */}
-        <div className="border-line flex border-b">
-          <div className="w-14 shrink-0" />
-          {days.map((d) => {
-            const isToday = ymd(d) === todayKey;
-            return (
-              <div
-                key={ymd(d)}
-                className="border-line flex-1 border-l py-2 text-center"
-              >
-                <div className="text-muted text-xs">{dayName(d)}</div>
-                <div
-                  className={cn(
-                    "tabular text-sm font-semibold",
-                    isToday ? "text-lacquer-ink" : "text-ink",
-                  )}
-                >
-                  {d.getDate()}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Grille horaire */}
-        <div className="flex" style={{ height: GRID_HEIGHT }}>
-          {/* Gouttière des heures */}
-          <div className="w-14 shrink-0">
-            {HOURS.map((h) => (
-              <div
-                key={h}
-                style={{ height: HOUR_PX }}
-                className="border-line relative border-t first:border-t-0"
-              >
-                <span className="tabular text-muted absolute -top-2 right-2 text-xs">
-                  {h}:00
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Colonnes des jours */}
-          {days.map((d) => {
-            const dayKey = ymd(d);
-            const dayAppts = appointments.filter(
-              (a) => ymd(new Date(a.startAtISO)) === dayKey,
-            );
-            return (
-              <div
-                key={dayKey}
-                onClick={(e) => onColumnClick(e, d)}
-                className="border-line relative flex-1 cursor-pointer border-l"
-                style={{
-                  backgroundImage: `repeating-linear-gradient(var(--line) 0 1px, transparent 1px ${HOUR_PX}px)`,
-                }}
-              >
-                {dayAppts.map((a) => {
-                  const start = new Date(a.startAtISO);
-                  const top = Math.max(
-                    0,
-                    minutesFromGridStart(start) * PX_PER_MIN,
-                  );
-                  const height = Math.max(18, a.durationMin * PX_PER_MIN - 2);
-                  return (
-                    <button
-                      key={a.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEdit(a);
-                      }}
-                      style={{ top, height }}
+        <div className="overflow-x-auto">
+          <div className={cn(view === "week" && "min-w-[640px] sm:min-w-0")}>
+            {/* En-têtes de jours */}
+            <div className="border-line flex border-b">
+              <div className="w-14 shrink-0" />
+              {days.map((d) => {
+                const isToday = ymd(d) === todayKey;
+                return (
+                  <div
+                    key={ymd(d)}
+                    className="border-line flex-1 border-l py-2 text-center"
+                  >
+                    <div className="text-muted text-xs">{dayName(d)}</div>
+                    <div
                       className={cn(
-                        "absolute right-0.5 left-0.5 overflow-hidden rounded-md border px-1.5 py-1 text-left text-xs",
-                        STATUS_STYLE[a.status],
+                        "tabular text-sm font-semibold",
+                        isToday ? "text-lacquer-ink" : "text-ink",
                       )}
                     >
-                      <span className="tabular font-medium">
-                        {formatTime(start)}
-                      </span>{" "}
-                      <span className="font-medium">{a.clientName}</span>
-                      {a.serviceName ? (
-                        <div className="truncate opacity-80">
-                          {a.serviceName}
-                        </div>
-                      ) : null}
-                    </button>
-                  );
-                })}
+                      {d.getDate()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Grille horaire */}
+            <div className="flex" style={{ height: GRID_HEIGHT }}>
+              {/* Gouttière des heures */}
+              <div className="w-14 shrink-0">
+                {HOURS.map((h) => (
+                  <div
+                    key={h}
+                    style={{ height: HOUR_PX }}
+                    className="border-line relative border-t first:border-t-0"
+                  >
+                    <span className="tabular text-muted absolute -top-2 right-2 text-xs">
+                      {h}:00
+                    </span>
+                  </div>
+                ))}
               </div>
-            );
-          })}
+
+              {/* Colonnes des jours */}
+              {days.map((d) => {
+                const dayKey = ymd(d);
+                const dayAppts = appointments.filter(
+                  (a) => ymd(new Date(a.startAtISO)) === dayKey,
+                );
+                return (
+                  <div
+                    key={dayKey}
+                    onClick={(e) => onColumnClick(e, d)}
+                    className="border-line relative flex-1 cursor-pointer border-l"
+                    style={{
+                      backgroundImage: `repeating-linear-gradient(var(--line) 0 1px, transparent 1px ${HOUR_PX}px)`,
+                    }}
+                  >
+                    {dayAppts.map((a) => {
+                      const start = new Date(a.startAtISO);
+                      const top = Math.max(
+                        0,
+                        minutesFromGridStart(start) * PX_PER_MIN,
+                      );
+                      const height = Math.max(
+                        18,
+                        a.durationMin * PX_PER_MIN - 2,
+                      );
+                      return (
+                        <button
+                          key={a.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(a);
+                          }}
+                          style={{ top, height }}
+                          className={cn(
+                            "absolute right-0.5 left-0.5 overflow-hidden rounded-md border px-1.5 py-1 text-left text-xs",
+                            STATUS_STYLE[a.status],
+                          )}
+                        >
+                          <span className="tabular font-medium">
+                            {formatTime(start)}
+                          </span>{" "}
+                          <span className="font-medium">{a.clientName}</span>
+                          {a.serviceName ? (
+                            <div className="truncate opacity-80">
+                              {a.serviceName}
+                            </div>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
