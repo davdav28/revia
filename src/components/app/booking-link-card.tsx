@@ -15,6 +15,7 @@ export function BookingLinkCard({
 }) {
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const shown = isPending ? !enabled : enabled;
 
   function copy() {
     navigator.clipboard?.writeText(url).then(() => {
@@ -44,19 +45,19 @@ export function BookingLinkCard({
         <button
           type="button"
           role="switch"
-          aria-checked={enabled}
+          aria-checked={shown}
           aria-label="Activer la réservation en ligne"
           disabled={isPending}
           onClick={toggle}
           className={cn(
-            "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
-            enabled ? "bg-lacquer" : "bg-line",
+            "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+            shown ? "bg-lacquer" : "bg-line",
           )}
         >
           <span
             className={cn(
               "bg-surface inline-block size-5 rounded-full shadow transition-transform",
-              enabled ? "translate-x-[22px]" : "translate-x-0.5",
+              shown ? "translate-x-[22px]" : "translate-x-0.5",
             )}
           />
         </button>

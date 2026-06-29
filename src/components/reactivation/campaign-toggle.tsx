@@ -14,6 +14,8 @@ export function CampaignToggle({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  // Réponse instantanée : on affiche l'état cible pendant l'aller-retour serveur.
+  const shown = isPending ? !active : active;
 
   function toggle() {
     startTransition(async () => {
@@ -26,19 +28,19 @@ export function CampaignToggle({
     <button
       type="button"
       role="switch"
-      aria-checked={active}
+      aria-checked={shown}
       aria-label={active ? "Désactiver la campagne" : "Activer la campagne"}
       disabled={isPending}
       onClick={toggle}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
-        active ? "bg-lacquer" : "bg-line",
+        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
+        shown ? "bg-lacquer" : "bg-line",
       )}
     >
       <span
         className={cn(
           "bg-surface inline-block size-5 rounded-full shadow transition-transform",
-          active ? "translate-x-[22px]" : "translate-x-0.5",
+          shown ? "translate-x-[22px]" : "translate-x-0.5",
         )}
       />
     </button>

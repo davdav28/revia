@@ -15,6 +15,7 @@ export function OptOutToggle({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const shown = isPending ? !optedOut : optedOut;
 
   function toggle() {
     startTransition(async () => {
@@ -29,9 +30,9 @@ export function OptOutToggle({
       size="sm"
       onClick={toggle}
       disabled={isPending}
-      className={optedOut ? "text-status-active" : "text-muted"}
+      className={shown ? "text-status-active" : "text-muted"}
     >
-      {optedOut ? (
+      {shown ? (
         <>
           <Bell className="size-4" />
           Réautoriser le contact
