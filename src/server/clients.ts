@@ -26,6 +26,7 @@ function readForm(formData: FormData) {
     phone: (formData.get("phone") as string) ?? "",
     email: (formData.get("email") as string) ?? "",
     notes: (formData.get("notes") as string) ?? "",
+    birthdate: (formData.get("birthdate") as string) ?? "",
     smsConsent: formData.get("smsConsent") === "on",
     emailConsent: formData.get("emailConsent") === "on",
     lastVisit: (formData.get("lastVisit") as string) ?? "",
@@ -55,6 +56,7 @@ export async function createClient(
       phone: normalizePhone(d.phone),
       email: d.email || null,
       notes: d.notes || null,
+      birthdate: parseFlexibleDate(d.birthdate),
       smsConsent: d.smsConsent,
       smsConsentAt: d.smsConsent ? now : null,
       emailConsent: d.emailConsent,
@@ -104,6 +106,7 @@ export async function updateClient(
       phone: normalizePhone(d.phone),
       email: d.email || null,
       notes: d.notes || null,
+      birthdate: parseFlexibleDate(d.birthdate),
       smsConsent: d.smsConsent,
       smsConsentAt: d.smsConsent ? (existing.smsConsentAt ?? now) : null,
       emailConsent: d.emailConsent,
@@ -198,6 +201,7 @@ export async function importClients(rows: ImportRow[]): Promise<ImportSummary> {
         lastName: (row.lastName ?? "").trim() || null,
         phone,
         email,
+        birthdate: parseFlexibleDate(row.birthdate),
         appointments: visitDate
           ? {
               create: {

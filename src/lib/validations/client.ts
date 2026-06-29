@@ -18,6 +18,7 @@ export const clientFormSchema = z.object({
   phone: z.string().trim().max(30).optional().default(""),
   email: emailField,
   notes: z.string().trim().max(2000).optional().default(""),
+  birthdate: z.string().trim().optional().default(""),
   smsConsent: z.boolean().default(false),
   emailConsent: z.boolean().default(false),
 });
@@ -38,4 +39,5 @@ export type ImportRow = {
   email?: string;
   lastVisit?: string;
   amount?: string;
+  birthdate?: string;
 };

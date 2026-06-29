@@ -129,6 +129,9 @@ export default async function ClientePage({
               phone: client.phone ?? "",
               email: client.email ?? "",
               notes: client.notes ?? "",
+              birthdate: client.birthdate
+                ? client.birthdate.toISOString().slice(0, 10)
+                : "",
               smsConsent: client.smsConsent,
               emailConsent: client.emailConsent,
             }}

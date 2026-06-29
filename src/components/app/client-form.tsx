@@ -14,6 +14,7 @@ export type ClientFormValues = {
   phone?: string;
   email?: string;
   notes?: string;
+  birthdate?: string; // AAAA-MM-JJ
   smsConsent?: boolean;
   emailConsent?: boolean;
 };
@@ -98,6 +99,18 @@ export function ClientForm({
           />
           <FieldError msg={fe.email?.[0]} />
         </div>
+      </div>
+
+      <div className="space-y-1.5 sm:max-w-[50%] sm:pr-2">
+        <Label htmlFor="birthdate">
+          Date de naissance (pour l'anniversaire)
+        </Label>
+        <Input
+          id="birthdate"
+          name="birthdate"
+          type="date"
+          defaultValue={defaultValues.birthdate}
+        />
       </div>
 
       {showFirstVisit ? (

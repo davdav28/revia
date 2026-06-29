@@ -57,6 +57,17 @@ const FIELDS: Field[] = [
     synonyms: ["email", "e-mail", "mail", "courriel"],
   },
   {
+    key: "birthdate",
+    label: "Date de naissance",
+    synonyms: [
+      "date de naissance",
+      "naissance",
+      "anniversaire",
+      "birthday",
+      "ddn",
+    ],
+  },
+  {
     key: "lastVisit",
     label: "Dernière visite",
     synonyms: [

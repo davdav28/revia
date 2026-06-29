@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { recomputeClientStats } from "@/lib/client-stats";
 import { normalizePhone } from "@/lib/phone";
 import { isSlotBookable, HORIZON_DAYS, type BusyInterval } from "@/lib/booking";
+import { getMessagingProvider } from "@/lib/messaging";
 
 const DAY = 86_400_000;
 
@@ -157,6 +158,28 @@ export async function createPublicBooking(
     minute: "2-digit",
     timeZone: salon.timezone,
   }).format(startAt);
+
+  // Confirmation à la cliente (best-effort : n'empêche jamais la réservation).
+  try {
+    const provider = getMessagingProvider();
+    if (email) {
+      await provider.sendEmail({
+        to: email,
+        subject: `Votre rendez-vous au ${salon.name} est confirmé`,
+        html: `<div><p>Bonjour ${d.firstName},</p><p>Votre rendez-vous est confirmé :</p><p><strong>${service.name}</strong><br>${dateLabel}</p><p>À très vite,<br>${salon.name}</p></div>`,
+        senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
+        senderName: salon.senderName,
+      });
+    } else if (phone) {
+      await provider.sendSms({
+        to: phone,
+        sender: salon.senderName,
+        body: `${salon.name} : votre RDV ${service.name} le ${dateLabel} est confirmé. À bientôt !`,
+      });
+    }
+  } catch {
+    // Silencieux : la confirmation est un bonus.
+  }
 
   return { ok: true, dateLabel, serviceName: service.name };
 }
