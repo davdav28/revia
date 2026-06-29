@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, History } from "lucide-react";
 import type { AppointmentStatus } from "@prisma/client";
@@ -75,13 +75,15 @@ export function AgendaView({
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [initial, setInitial] = useState<AppointmentInitial | null>(null);
+  const [isNavPending, startNav] = useTransition();
 
   const anchor = parseYmd(dateISO);
   const days = visibleDays(view, anchor);
   const todayKey = ymd(new Date());
 
   function navigate(d: Date, v: ViewMode) {
-    router.push(`/agenda?view=${v}&date=${ymd(d)}`);
+    // Transition : on garde l'agenda affiché (grisé) au lieu d'un écran de chargement.
+    startNav(() => router.push(`/agenda?view=${v}&date=${ymd(d)}`));
   }
 
   function openCreate(partial: Partial<AppointmentInitial>) {
@@ -196,7 +198,12 @@ export function AgendaView({
       </div>
 
       {/* Calendrier (défile horizontalement sur mobile en vue semaine) */}
-      <div className="border-line bg-surface overflow-hidden rounded-lg border">
+      <div
+        className={cn(
+          "border-line bg-surface overflow-hidden rounded-lg border transition-opacity",
+          isNavPending && "pointer-events-none opacity-60",
+        )}
+      >
         <div className="overflow-x-auto">
           <div className={cn(view === "week" && "min-w-[640px] sm:min-w-0")}>
             {/* En-têtes de jours */}
