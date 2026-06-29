@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Revia — design tokens
+ * Palette inspirée du vernis : base lumineuse, laque foncée, accent
+ * rouge laque unique. Volontairement loin des clichés « SaaS IA ».
+ * On ne consacre l'audace qu'au compteur de CA récupéré.
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* Surfaces & texte */
+  --base: #fbf9f7; /* blanc tiède très légèrement rosé — surface principale */
+  --surface: #ffffff; /* cartes / surfaces surélevées */
+  --ink: #2b1f2e; /* prune sombre — texte fort, éléments primaires */
+  --muted: #6b5d67; /* texte secondaire */
+  --line: #ece4e6; /* séparateurs discrets */
+
+  /* Accents */
+  --lacquer: #ce3a57; /* rouge laque signature — accent unique, parcimonie.
+    Très légèrement creusé vs #d6405e pour passer le contraste AA (4.5:1)
+    avec du texte clair sur les boutons/badges. */
+  --lacquer-ink: #b22a46; /* variante foncée pour hover / texte sur clair */
+  --nude: #e7d4c8; /* nude poudré — surfaces secondaires, badges */
+  --nude-soft: #f3e9e2; /* nude très clair — fonds de badge calmes */
+
+  /* Statuts cliente (sobres, lisibles, contraste AA sur fond clair) */
+  --status-active: #3f7d6e; /* vert sauge — cliente active */
+  --status-at-risk: #b07d2b; /* ambre — à risque */
+  --status-dormant: #b22a46; /* laque foncée — dormante */
+  --status-recovered: #4a5fb0; /* bleu encre — réactivée */
+  --status-lost: #8a7d84; /* gris prune — perdue */
+
+  /* Rayons — doux et cohérents, ni anguleux ni bulle */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* Ombres très discrètes (l'app reste calme) */
+  --shadow-card:
+    0 1px 2px rgba(43, 31, 46, 0.04), 0 8px 24px -12px rgba(43, 31, 46, 0.12);
+}
+
+/* Mapping des tokens vers les utilitaires Tailwind v4 */
+@theme inline {
+  --color-base: var(--base);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-lacquer: var(--lacquer);
+  --color-lacquer-ink: var(--lacquer-ink);
+  --color-nude: var(--nude);
+  --color-nude-soft: var(--nude-soft);
+
+  --color-status-active: var(--status-active);
+  --color-status-at-risk: var(--status-at-risk);
+  --color-status-dormant: var(--status-dormant);
+  --color-status-recovered: var(--status-recovered);
+  --color-status-lost: var(--status-lost);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  /* Polices (déclarées dans layout.tsx via next/font) */
+  --font-display: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--base);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Chiffres tabulaires partout où on affiche des montants/compteurs */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+  }
+
+  /* Focus clavier visible et cohérent (plancher de qualité, non négociable) */
+  :focus-visible {
+    outline: 2px solid var(--lacquer);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--nude);
+    color: var(--ink);
+  }
+}
+
+/* Respect strict de prefers-reduced-motion : on coupe toute animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,303 @@
+// Revia — schéma Prisma
+// Multi-tenant : toutes les données métier sont scoppées par salonId.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  owner
+  staff
+}
+
+/// Statut d'une cliente dans la boucle de réactivation.
+enum ClientStatus {
+  active
+  at_risk
+  dormant
+  recovered
+  lost
+}
+
+enum AppointmentStatus {
+  scheduled
+  completed
+  no_show
+  cancelled
+}
+
+/// Origine d'une visite / d'un rendez-vous.
+enum VisitSource {
+  manual
+  import
+  online_booking
+}
+
+enum CampaignTrigger {
+  dormancy
+  birthday
+  slow_slot
+  post_first_visit
+}
+
+enum MessageChannel {
+  sms
+  email
+}
+
+enum MessageStatus {
+  queued
+  sent
+  delivered
+  failed
+  opted_out
+}
+
+/// Un salon = un tenant.
+model Salon {
+  id         String   @id @default(cuid())
+  name       String
+  // Identifiant public pour la page de réservation en ligne (/r/<slug>).
+  slug           String?  @unique
+  bookingEnabled Boolean  @default(true)
+  senderName String   @default("Revia")
+  timezone   String   @default("Europe/Paris")
+  phone      String?
+  address    String?
+
+  // Paramètres de dormance (paramétrables par salon)
+  defaultCycleDays Int @default(28) // cycle de retour par défaut (sans prestation connue)
+  graceDays        Int @default(7) // tolérance avant de passer « à surveiller »
+  lostAfterDays    Int @default(180) // au-delà, cliente considérée « perdue »
+
+  // Abonnement Stripe
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String    @default("trial") // trial | active | past_due | canceled
+  plan                 String? // monthly | annual
+  currentPeriodEnd     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  clients      Client[]
+  services     Service[]
+  appointments Appointment[]
+  templates    MessageTemplate[]
+  campaigns    Campaign[]
+  messages     Message[]
+  recoveries   Recovery[]
+  suggestions  Suggestion[]
+}
+
+/// Membre d'un salon. Relié à l'utilisateur Supabase Auth via authId.
+model User {
+  id        String   @id @default(cuid())
+  authId    String   @unique
+  email     String
+  name      String?
+  role      UserRole @default(owner)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salon   Salon  @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId String
+
+  @@index([salonId])
+}
+
+/// Prestation proposée par le salon. `defaultIntervalDays` = cycle de retour
+/// attendu (ex. 21 j pour un remplissage) — sert au calcul de la dormance.
+model Service {
+  id                  String   @id @default(cuid())
+  name                String
+  priceCents          Int      @default(0)
+  defaultIntervalDays Int?
+  defaultDurationMin  Int      @default(45)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  salon        Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId      String
+  appointments Appointment[]
+
+  @@index([salonId])
+}
+
+/// Cliente du salon. Champs dénormalisés recalculés depuis les `Appointment`.
+model Client {
+  id        String  @id @default(cuid())
+  firstName String
+  lastName  String?
+  phone     String?
+  email     String?
+  notes     String?
+  birthdate DateTime?
+
+  // Consentements RGPD
+  smsConsent     Boolean   @default(false)
+  smsConsentAt   DateTime?
+  emailConsent   Boolean   @default(false)
+  emailConsentAt DateTime?
+  optedOutAt     DateTime?
+
+  // Champs dénormalisés (dérivés des visites) + suivi de relance
+  lastVisitAt       DateTime?
+  visitCount        Int          @default(0)
+  totalSpendCents   Int          @default(0)
+  averageSpendCents Int          @default(0)
+  status            ClientStatus @default(active)
+  lastContactedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salon        Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId      String
+  appointments Appointment[]
+  messages     Message[]
+  recoveries   Recovery[]
+
+  @@index([salonId])
+  @@index([salonId, status])
+  @@index([salonId, lastVisitAt])
+}
+
+/// Une visite (passée) ou un rendez-vous (futur).
+model Appointment {
+  id          String            @id @default(cuid())
+  startAt     DateTime
+  durationMin Int               @default(45)
+  status      AppointmentStatus @default(completed)
+  amountCents Int?
+  source      VisitSource       @default(manual)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  salon      Salon      @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId    String
+  client     Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId   String
+  service    Service?   @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceId  String?
+  recoveries Recovery[]
+
+  @@index([salonId])
+  @@index([clientId])
+  @@index([salonId, startAt])
+}
+
+/// Modèle de message (notre valeur). Pré-rempli, éditable par le salon.
+model MessageTemplate {
+  id        String           @id @default(cuid())
+  name      String
+  channel   MessageChannel
+  trigger   CampaignTrigger?
+  // Scénario fin (cycle, soft, long, slot, birthday, firstvisit, novelty,
+  // seasonal, winback) : pilote la sélection at-risk/dormante et la rotation.
+  scenario  String?
+  subject   String?
+  body      String
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  salon     Salon      @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId   String
+  campaigns Campaign[]
+
+  @@index([salonId])
+}
+
+/// Règle de réactivation : un déclencheur + un canal + un modèle.
+model Campaign {
+  id                 String          @id @default(cuid())
+  name               String
+  trigger            CampaignTrigger
+  channel            MessageChannel
+  isActive           Boolean         @default(false)
+  cooldownDays       Int             @default(30) // délai mini entre deux relances d'une même cliente
+  recoveryWindowDays Int             @default(30) // fenêtre pour attribuer un retour à la relance
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  salon      Salon           @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId    String
+  template   MessageTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  templateId String
+  messages   Message[]
+
+  @@index([salonId])
+}
+
+/// Un envoi (SMS ou email).
+model Message {
+  id         String        @id @default(cuid())
+  channel    MessageChannel
+  to         String
+  subject    String?
+  body       String
+  status     MessageStatus @default(queued)
+  costCents  Int?
+  providerId String?
+  error      String?
+  sentAt     DateTime?
+  createdAt  DateTime      @default(now())
+
+  salon      Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId    String
+  client     Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId   String
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignId String?
+  recovery   Recovery?
+
+  @@index([salonId])
+  @@index([clientId])
+  @@index([salonId, createdAt])
+}
+
+/// Suggestion ou demande d'aide du salon — capturée pour améliorer le produit.
+/// `category` et `status` sont des chaînes libres (extensibles sans migration).
+model Suggestion {
+  id          String   @id @default(cuid())
+  category    String   @default("idea") // question | idea | problem
+  message     String
+  authorName  String?
+  authorEmail String?
+  status      String   @default("new") // new | seen | done
+  createdAt   DateTime @default(now())
+
+  salon   Salon  @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId String
+
+  @@index([salonId])
+}
+
+/// La preuve : une cliente relancée qui reprend rendez-vous. Alimente le dashboard.
+model Recovery {
+  id                   String   @id @default(cuid())
+  recoveredAmountCents Int      @default(0)
+  recoveredAt          DateTime @default(now())
+  retainedAt90d        Boolean  @default(false)
+
+  salon         Salon        @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId       String
+  client        Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
+  message       Message      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId     String       @unique
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  appointmentId String?
+
+  @@index([salonId])
+  @@index([salonId, recoveredAt])
+}
