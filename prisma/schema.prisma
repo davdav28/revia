@@ -66,6 +66,10 @@ model Salon {
   // Identifiant public pour la page de réservation en ligne (/r/<slug>).
   slug           String?  @unique
   bookingEnabled Boolean  @default(true)
+  // Horaires d'ouverture (réservation en ligne). openDays : 0 = dimanche … 6 = samedi.
+  openDays       Int[]    @default([1, 2, 3, 4, 5, 6])
+  openFromHour   Int      @default(9)
+  openToHour     Int      @default(19)
   senderName String   @default("Revia")
   timezone   String   @default("Europe/Paris")
   phone      String?

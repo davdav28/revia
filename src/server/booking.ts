@@ -83,16 +83,24 @@ export async function createPublicBooking(
   const now = new Date();
   const startAt = new Date(d.startAtISO);
   const busy = await loadBusy(salon.id, now);
+  const hours = {
+    openDays: salon.openDays,
+    openFromHour: salon.openFromHour,
+    openToHour: salon.openToHour,
+  };
   if (
     !isSlotBookable(
       startAt,
       service.defaultDurationMin,
       busy,
       salon.timezone,
+      hours,
       now,
     )
   ) {
-    return { error: "Ce créneau vient d'être pris. Choisissez-en un autre." };
+    return {
+      error: "Ce créneau n'est plus disponible. Choisissez-en un autre.",
+    };
   }
 
   const phone = normalizePhone(d.phone);
@@ -194,7 +202,15 @@ export async function createPublicBooking(
 export async function getBookingData(slug: string) {
   const salon = await prisma.salon.findUnique({
     where: { slug },
-    select: { id: true, name: true, bookingEnabled: true, timezone: true },
+    select: {
+      id: true,
+      name: true,
+      bookingEnabled: true,
+      timezone: true,
+      openDays: true,
+      openFromHour: true,
+      openToHour: true,
+    },
   });
   if (!salon || !salon.bookingEnabled) return null;
 
@@ -216,5 +232,10 @@ export async function getBookingData(slug: string) {
     salonName: salon.name,
     services,
     busy,
+    hours: {
+      openDays: salon.openDays,
+      openFromHour: salon.openFromHour,
+      openToHour: salon.openToHour,
+    },
   };
 }

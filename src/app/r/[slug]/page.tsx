@@ -42,7 +42,12 @@ export default async function BookingPage({
         </p>
 
         <div className="mt-8">
-          <BookingFlow slug={slug} services={data.services} busy={data.busy} />
+          <BookingFlow
+            slug={slug}
+            services={data.services}
+            busy={data.busy}
+            hours={data.hours}
+          />
         </div>
       </main>
 

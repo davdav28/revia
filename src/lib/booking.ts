@@ -1,16 +1,25 @@
 /**
  * Disponibilités de réservation en ligne. Fonctions pures (utilisables côté
- * client comme serveur). Horaires par défaut : lundi-samedi, 9h-19h, par pas de
- * 30 min ; horizon 14 jours. Un seul rendez-vous à la fois (poste unique).
- * Affinable plus tard via des horaires par salon.
+ * client comme serveur). Les horaires (jours + plage) sont propres à chaque
+ * salon ; pas de 30 min ; horizon 14 jours. Un seul rendez-vous à la fois.
  */
-export const OPEN_DAYS = [1, 2, 3, 4, 5, 6]; // 0 = dimanche
-export const OPEN_FROM_HOUR = 9;
-export const OPEN_TO_HOUR = 19;
 export const SLOT_STEP_MIN = 30;
 export const HORIZON_DAYS = 14;
 
 const DAY = 86_400_000;
+
+/** Horaires d'ouverture d'un salon. openDays : 0 = dimanche … 6 = samedi. */
+export type OpeningHours = {
+  openDays: number[];
+  openFromHour: number;
+  openToHour: number;
+};
+
+export const DEFAULT_HOURS: OpeningHours = {
+  openDays: [1, 2, 3, 4, 5, 6],
+  openFromHour: 9,
+  openToHour: 19,
+};
 
 export type BusyInterval = { start: number; end: number }; // ms epoch
 
@@ -33,6 +42,7 @@ function overlaps(start: number, end: number, busy: BusyInterval[]): boolean {
 export function availableSlots(
   durationMin: number,
   busy: BusyInterval[],
+  hours: OpeningHours,
   now: Date = new Date(),
 ): DaySlots[] {
   const out: DaySlots[] = [];
@@ -40,11 +50,11 @@ export function availableSlots(
 
   for (let d = 0; d < HORIZON_DAYS; d++) {
     const day = new Date(today.getTime() + d * DAY);
-    if (!OPEN_DAYS.includes(day.getDay())) continue;
+    if (!hours.openDays.includes(day.getDay())) continue;
 
     const times: string[] = [];
-    const lastStart = OPEN_TO_HOUR * 60 - durationMin;
-    for (let m = OPEN_FROM_HOUR * 60; m <= lastStart; m += SLOT_STEP_MIN) {
+    const lastStart = hours.openToHour * 60 - durationMin;
+    for (let m = hours.openFromHour * 60; m <= lastStart; m += SLOT_STEP_MIN) {
       const slotStart = new Date(
         day.getFullYear(),
         day.getMonth(),
@@ -92,22 +102,23 @@ export function hourAndDayInTz(
   };
 }
 
-/** Re-contrôle serveur d'un créneau (fuseau du salon + chevauchement). */
+/** Re-contrôle serveur d'un créneau (fuseau + horaires du salon + chevauchement). */
 export function isSlotBookable(
   startAt: Date,
   durationMin: number,
   busy: BusyInterval[],
   tz: string,
+  hours: OpeningHours,
   now: Date = new Date(),
 ): boolean {
   if (startAt.getTime() <= now.getTime()) return false;
   if (startAt.getTime() > now.getTime() + (HORIZON_DAYS + 1) * DAY)
     return false;
   const { hour, minute, weekday } = hourAndDayInTz(startAt, tz);
-  if (!OPEN_DAYS.includes(weekday)) return false;
+  if (!hours.openDays.includes(weekday)) return false;
   const startMin = hour * 60 + minute;
-  if (startMin < OPEN_FROM_HOUR * 60) return false;
-  if (startMin + durationMin > OPEN_TO_HOUR * 60) return false;
+  if (startMin < hours.openFromHour * 60) return false;
+  if (startMin + durationMin > hours.openToHour * 60) return false;
   const endMs = startAt.getTime() + durationMin * 60_000;
   return !overlaps(startAt.getTime(), endMs, busy);
 }

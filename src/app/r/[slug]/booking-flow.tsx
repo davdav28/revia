@@ -8,7 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/money";
-import { availableSlots, type BusyInterval } from "@/lib/booking";
+import {
+  availableSlots,
+  type BusyInterval,
+  type OpeningHours,
+} from "@/lib/booking";
 import { createPublicBooking } from "@/server/booking";
 
 type Service = {
@@ -30,10 +34,12 @@ export function BookingFlow({
   slug,
   services,
   busy,
+  hours,
 }: {
   slug: string;
   services: Service[];
   busy: BusyInterval[];
+  hours: OpeningHours;
 }) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [service, setService] = useState<Service | null>(null);
@@ -57,8 +63,9 @@ export function BookingFlow({
   } | null>(null);
 
   const slots = useMemo(
-    () => (service ? availableSlots(service.defaultDurationMin, busy) : []),
-    [service, busy],
+    () =>
+      service ? availableSlots(service.defaultDurationMin, busy, hours) : [],
+    [service, busy, hours],
   );
   const selectedDay = slots.find((s) => s.dayMs === dayMs) ?? slots[0] ?? null;
 

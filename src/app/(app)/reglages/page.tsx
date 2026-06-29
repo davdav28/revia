@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkle, ChevronRight, CreditCard, Download } from "lucide-react";
+import {
+  Sparkle,
+  ChevronRight,
+  CreditCard,
+  Download,
+  Clock,
+} from "lucide-react";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app/page-header";
@@ -88,6 +94,23 @@ export default async function ReglagesPage() {
           </CardContent>
         </Card>
       ) : null}
+
+      <Link href="/reglages/horaires" className="block">
+        <Card className="hover:bg-nude-soft/40 transition-colors">
+          <CardContent className="flex items-center gap-4 py-5">
+            <div className="bg-nude-soft text-lacquer-ink flex size-10 items-center justify-center rounded-md">
+              <Clock className="size-5" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-base">Horaires d'ouverture</CardTitle>
+              <CardDescription>
+                Jours et heures où vos clientes peuvent réserver
+              </CardDescription>
+            </div>
+            <ChevronRight className="text-muted size-5" />
+          </CardContent>
+        </Card>
+      </Link>
 
       <Card>
         <CardHeader>
