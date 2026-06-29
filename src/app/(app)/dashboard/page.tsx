@@ -118,26 +118,28 @@ export default async function DashboardPage() {
       : null;
   const roi = recoveredMonthCents / SUBSCRIPTION.monthlyCents;
 
-  // Rétention durable (réactivations matures de +90 j encore actives ensuite)
+  // Rétention durable (réactivations matures de +90 j encore actives ensuite).
+  // Batché : 2 requêtes au lieu de 1 + N.
   let retentionPct: number | null = null;
   if (matureCount > 0) {
     const matured = await prisma.recovery.findMany({
       where: { salonId, recoveredAt: { lte: ninetyAgo } },
       select: { clientId: true, recoveredAt: true },
     });
-    let retained = 0;
-    for (const m of matured) {
-      const later = await prisma.appointment.findFirst({
-        where: {
-          salonId,
-          clientId: m.clientId,
-          status: "completed",
-          startAt: { gt: new Date(m.recoveredAt.getTime() + 30 * DAY) },
-        },
-        select: { id: true },
-      });
-      if (later) retained++;
-    }
+    const maturedAppts = await prisma.appointment.findMany({
+      where: {
+        salonId,
+        status: "completed",
+        clientId: { in: [...new Set(matured.map((m) => m.clientId))] },
+      },
+      select: { clientId: true, startAt: true },
+    });
+    const retained = matured.filter((m) => {
+      const threshold = m.recoveredAt.getTime() + 30 * DAY;
+      return maturedAppts.some(
+        (a) => a.clientId === m.clientId && a.startAt.getTime() > threshold,
+      );
+    }).length;
     retentionPct = Math.round((retained / matureCount) * 100);
   }
 
@@ -160,30 +162,31 @@ export default async function DashboardPage() {
     if (b) b.amountCents += r.recoveredAmountCents;
   }
 
-  // « après X semaines » : écart depuis la visite précédente
-  const recentWithGap = await Promise.all(
-    recentRecos.map(async (r) => {
-      const prev = await prisma.appointment.findFirst({
+  // « après X semaines » : écart depuis la visite précédente.
+  // Batché : 1 requête pour toutes les réactivations récentes au lieu de N.
+  const recentApptsByClient = recentRecos.length
+    ? await prisma.appointment.findMany({
         where: {
           salonId,
-          clientId: r.clientId,
           status: "completed",
-          startAt: { lt: r.recoveredAt },
+          clientId: { in: [...new Set(recentRecos.map((r) => r.clientId))] },
         },
-        orderBy: { startAt: "desc" },
-        select: { startAt: true },
-      });
-      const weeks = prev
-        ? Math.max(
-            1,
-            Math.round(
-              (r.recoveredAt.getTime() - prev.startAt.getTime()) / (7 * DAY),
-            ),
-          )
-        : null;
-      return { ...r, weeks };
-    }),
-  );
+        select: { clientId: true, startAt: true },
+      })
+    : [];
+  const recentWithGap = recentRecos.map((r) => {
+    const prev = recentApptsByClient.reduce<Date | null>((max, a) => {
+      if (a.clientId !== r.clientId || a.startAt >= r.recoveredAt) return max;
+      return !max || a.startAt > max ? a.startAt : max;
+    }, null);
+    const weeks = prev
+      ? Math.max(
+          1,
+          Math.round((r.recoveredAt.getTime() - prev.getTime()) / (7 * DAY)),
+        )
+      : null;
+    return { ...r, weeks };
+  });
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
