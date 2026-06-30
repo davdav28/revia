@@ -22,12 +22,10 @@ export default function MentionsLegalesPage() {
           Siège : {LEGAL.address}
           <br />
           {LEGAL.siret}
-          {LEGAL.vat ? (
-            <>
-              <br />
-              TVA intracommunautaire : {LEGAL.vat}
-            </>
-          ) : null}
+          <br />
+          {LEGAL.vat
+            ? `TVA intracommunautaire : ${LEGAL.vat}`
+            : "TVA non applicable, art. 293 B du CGI"}
           <br />
           Contact : {LEGAL.contactEmail}
         </p>

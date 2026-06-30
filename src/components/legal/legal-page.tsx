@@ -59,11 +59,9 @@ export function LegalPage({
 
         <div className="mt-8 space-y-7">{children}</div>
 
-        <p className="border-status-at-risk/30 bg-status-at-risk/10 text-status-at-risk mt-10 rounded-md border px-3 py-2 text-xs">
-          Ce document est un modèle de bonne foi. Faites-le vérifier par un
-          juriste et complétez les mentions{" "}
-          <code className="font-mono">[à compléter]</code> avant toute
-          exploitation commerciale.
+        <p className="text-muted mt-10 text-xs">
+          Document rédigé de bonne foi. Nous vous recommandons de le faire
+          vérifier par un juriste avant exploitation commerciale.
         </p>
 
         <nav className="border-line mt-8 flex flex-wrap gap-x-5 gap-y-2 border-t pt-6 text-sm">

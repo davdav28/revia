@@ -8,13 +8,13 @@ export const LEGAL = {
   updatedAt: "30 juin 2026",
 
   /** Éditeur du service. */
-  companyName: "[Raison sociale à compléter]",
-  legalForm: "[Forme juridique à compléter — ex. micro-entreprise, SASU]",
-  capital: "", // ex. "1 000 €" si société ; vide pour micro-entreprise
-  siret: "[SIREN / SIRET à compléter]",
-  vat: "", // n° TVA intracommunautaire si applicable
-  address: "[Adresse du siège à compléter]",
-  director: "[Nom du responsable de la publication à compléter]",
+  companyName: "David Chen",
+  legalForm: "Entrepreneur individuel (micro-entreprise)",
+  capital: "", // sans objet pour une micro-entreprise
+  siret: "SIRET 894 056 506 00039",
+  vat: "", // TVA non applicable, art. 293 B du CGI (franchise en base)
+  address: "60 rue François 1er, 75008 Paris",
+  director: "David Chen",
 
   /** Contact & site. */
   contactEmail: "contact@reviagence.com",
