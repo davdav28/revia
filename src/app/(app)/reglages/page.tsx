@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookingLinkCard } from "@/components/app/booking-link-card";
+import { SalonContactForm } from "@/components/app/salon-contact-form";
 import { DeleteAccountButton } from "@/components/app/delete-account-button";
 import { bookingUrl } from "@/lib/slug";
 import { SUBSCRIPTION_STATUS_LABEL } from "@/lib/subscription";
@@ -136,10 +137,18 @@ export default async function ReglagesPage() {
         <CardHeader>
           <CardTitle>Salon</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <Row label="Nom du salon" value={member.salon.name} />
-          <Row label="Nom expéditeur SMS" value={member.salon.senderName} />
-          <Row label="Fuseau horaire" value={member.salon.timezone} />
+        <CardContent className="space-y-5 pt-0">
+          <div>
+            <Row label="Nom du salon" value={member.salon.name} />
+            <Row label="Nom expéditeur SMS" value={member.salon.senderName} />
+            <Row label="Fuseau horaire" value={member.salon.timezone} />
+          </div>
+          <div className="border-line border-t pt-5">
+            <SalonContactForm
+              address={member.salon.address ?? ""}
+              phone={member.salon.phone ?? ""}
+            />
+          </div>
         </CardContent>
       </Card>
 

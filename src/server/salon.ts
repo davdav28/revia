@@ -15,6 +15,32 @@ export async function setBookingEnabled(enabled: boolean): Promise<void> {
   revalidatePath("/reglages");
 }
 
+const contactSchema = z.object({
+  address: z.string().trim().max(200).optional().default(""),
+  phone: z.string().trim().max(30).optional().default(""),
+});
+
+/** Coordonnées du salon (affichées aux clientes sur la page de réservation). */
+export async function setSalonContact(input: {
+  address: string;
+  phone: string;
+}): Promise<{ ok: true } | { error: string }> {
+  const member = await requireMember();
+  const parsed = contactSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Coordonnées invalides." };
+  }
+  await prisma.salon.update({
+    where: { id: member.salonId },
+    data: {
+      address: parsed.data.address || null,
+      phone: parsed.data.phone || null,
+    },
+  });
+  revalidatePath("/reglages");
+  return { ok: true };
+}
+
 const hoursSchema = z
   .object({
     openDays: z.array(z.number().int().min(0).max(6)).max(7),

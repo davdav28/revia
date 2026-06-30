@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { getBookingData } from "@/server/booking";
 import { BookingFlow } from "./booking-flow";
@@ -26,10 +27,36 @@ export default async function BookingPage({
   return (
     <div className="bg-base min-h-dvh">
       <header className="border-line border-b">
-        <div className="mx-auto flex h-16 max-w-2xl items-center px-6">
+        <div className="mx-auto flex max-w-2xl flex-col gap-1 px-6 py-3">
           <span className="font-display text-ink text-lg font-bold">
             {data.salonName}
           </span>
+          {data.salonAddress || data.salonPhone ? (
+            <div className="text-muted flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              {data.salonAddress ? (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${data.salonName} ${data.salonAddress}`,
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-ink inline-flex items-center gap-1.5"
+                >
+                  <MapPin className="size-3.5 shrink-0" />
+                  {data.salonAddress}
+                </a>
+              ) : null}
+              {data.salonPhone ? (
+                <a
+                  href={`tel:${data.salonPhone.replace(/\s/g, "")}`}
+                  className="hover:text-ink inline-flex items-center gap-1.5"
+                >
+                  <Phone className="size-3.5 shrink-0" />
+                  {data.salonPhone}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </header>
 

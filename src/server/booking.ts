@@ -180,7 +180,7 @@ export async function createPublicBooking(
       await provider.sendEmail({
         to: email,
         subject: `Votre rendez-vous au ${salon.name} est confirmé`,
-        html: `<div><p>Bonjour ${d.firstName},</p><p>Votre rendez-vous est confirmé :</p><p><strong>${service.name}</strong><br>${dateLabel}</p><p>À très vite,<br>${salon.name}</p></div>`,
+        html: `<div><p>Bonjour ${d.firstName},</p><p>Votre rendez-vous est confirmé :</p><p><strong>${service.name}</strong><br>${dateLabel}</p>${salon.address ? `<p>📍 ${salon.address}</p>` : ""}${salon.phone ? `<p>📞 ${salon.phone}</p>` : ""}<p>À très vite,<br>${salon.name}</p></div>`,
         senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
         senderName: salon.senderName,
       });
@@ -205,6 +205,8 @@ export async function getBookingData(slug: string) {
     select: {
       id: true,
       name: true,
+      address: true,
+      phone: true,
       bookingEnabled: true,
       timezone: true,
       openDays: true,
@@ -230,6 +232,8 @@ export async function getBookingData(slug: string) {
 
   return {
     salonName: salon.name,
+    salonAddress: salon.address,
+    salonPhone: salon.phone,
     services,
     busy,
     hours: {
