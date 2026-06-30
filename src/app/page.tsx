@@ -43,6 +43,9 @@ export default function Home() {
             <a href="#onglerie" className="hover:text-ink">
               Pour l'onglerie
             </a>
+            <Link href="/tarifs" className="hover:text-ink">
+              Tarifs
+            </Link>
           </nav>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>

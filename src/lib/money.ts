@@ -15,6 +15,21 @@ export function formatCents(cents: number | null | undefined): string {
   return eurosFormatter.format((cents ?? 0) / 100);
 }
 
+const eurosPreciseFormatter = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/**
+ * Formate des centimes en euros avec 2 décimales fixes : 10 → « 0,10 € ».
+ * Pour les prix unitaires sous l'euro (ex. prix du SMS au-delà du quota).
+ */
+export function formatCentsPrecise(cents: number | null | undefined): string {
+  return eurosPreciseFormatter.format((cents ?? 0) / 100);
+}
+
 /**
  * Convertit une saisie utilisateur en euros (« 35 », « 35,50 », « 35.5 »)
  * en centimes. Retourne null si vide/invalide.

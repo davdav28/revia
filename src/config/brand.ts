@@ -48,9 +48,18 @@ export const SUBSCRIPTION = {
     {
       id: "essentiel",
       label: "Essentiel",
+      tagline:
+        "Pour la prothésiste ou le petit salon qui démarre la réactivation.",
       smsQuota: 300,
       monthlyCents: 6900,
       annualCents: 69000,
+      // Prix du SMS au-delà du quota (dégressif selon le plan).
+      overageCents: 16,
+      maxSalons: 1,
+      maxUsers: 1,
+      support: "email" as const,
+      dedicatedOnboarding: false,
+      consolidatedMultiSite: false,
       monthlyPriceEnvKey: "STRIPE_PRICE_ESSENTIEL_MONTHLY",
       annualPriceEnvKey: "STRIPE_PRICE_ESSENTIEL_ANNUAL",
       highlight: false,
@@ -58,9 +67,16 @@ export const SUBSCRIPTION = {
     {
       id: "pro",
       label: "Pro",
+      tagline: "Pour le salon établi qui veut tout, sans limite de scénario.",
       smsQuota: 700,
       monthlyCents: 11900,
       annualCents: 119000,
+      overageCents: 13,
+      maxSalons: 2,
+      maxUsers: 5,
+      support: "prioritaire" as const,
+      dedicatedOnboarding: false,
+      consolidatedMultiSite: true,
       monthlyPriceEnvKey: "STRIPE_PRICE_PRO_MONTHLY",
       annualPriceEnvKey: "STRIPE_PRICE_PRO_ANNUAL",
       highlight: true,
@@ -68,17 +84,25 @@ export const SUBSCRIPTION = {
     {
       id: "multi",
       label: "Multi",
+      tagline:
+        "Pour plusieurs salons ou une équipe qui pilote à grande échelle.",
       smsQuota: 1500,
       monthlyCents: 19900,
       annualCents: 199000,
+      overageCents: 10,
+      maxSalons: null, // « 3 et + »
+      maxUsers: null, // illimité
+      support: "prioritaire" as const,
+      dedicatedOnboarding: true,
+      consolidatedMultiSite: true,
       monthlyPriceEnvKey: "STRIPE_PRICE_MULTI_MONTHLY",
       annualPriceEnvKey: "STRIPE_PRICE_MULTI_ANNUAL",
       highlight: false,
     },
   ],
 
-  // Dépassement & garde-fous (communs aux 3 plans).
-  overagePerSegmentCents: 12, // prix de vente du segment en dépassement
+  // Garde-fous (communs aux 3 plans). Le prix du dépassement est désormais
+  // porté par chaque plan (`overageCents`, dégressif).
   defaultOverageCapCents: 3000, // plafond de dépassement par défaut (30 €)
   quotaAlertPct: 80, // alerte à 80 % du quota
 
@@ -103,4 +127,12 @@ export function getPlan(id: string | null | undefined): Plan | undefined {
 /** Quota SMS mensuel d'un plan (0 si plan inconnu). */
 export function planQuota(id: string | null | undefined): number {
   return getPlan(id)?.smsQuota ?? 0;
+}
+
+/**
+ * Prix d'un SMS au-delà du quota, en centimes (dégressif selon le plan).
+ * Repli sur le plan mis en avant si le plan est inconnu.
+ */
+export function getOverageCents(id: string | null | undefined): number {
+  return (getPlan(id) ?? getPlan(HIGHLIGHTED_PLAN_ID)!).overageCents;
 }

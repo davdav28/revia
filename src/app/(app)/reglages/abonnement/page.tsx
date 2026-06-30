@@ -10,7 +10,9 @@ import {
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SubscribeButtons } from "@/components/app/subscribe-buttons";
+import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 import { formatDate } from "@/lib/dates";
+import { formatCentsPrecise } from "@/lib/money";
 import { getPlan } from "@/config/brand";
 
 export const metadata: Metadata = { title: "Abonnement" };
@@ -62,12 +64,18 @@ export default async function AbonnementPage() {
           </Badge>
         </div>
         {plan ? (
-          <p className="tabular text-muted mt-2 text-sm">
-            SMS ce mois : {salon.smsUsedThisPeriod} / {quota} segments
-            {salon.rechargeSegments > 0
-              ? ` (dont ${salon.rechargeSegments} de recharge)`
-              : ""}
-          </p>
+          <>
+            <p className="tabular text-muted mt-2 text-sm">
+              SMS ce mois : {salon.smsUsedThisPeriod} / {quota} segments
+              {salon.rechargeSegments > 0
+                ? ` (dont ${salon.rechargeSegments} de recharge)`
+                : ""}
+            </p>
+            <p className="text-muted mt-1 text-sm">
+              Au-delà : {formatCentsPrecise(plan.overageCents)} le SMS, plafonné
+              à votre limite.
+            </p>
+          </>
         ) : null}
         {salon.currentPeriodEnd ? (
           <p className="text-muted mt-2 text-sm">
@@ -90,6 +98,13 @@ export default async function AbonnementPage() {
         isActive={active}
         stripeConfigured={stripeOn}
       />
+
+      <section className="space-y-3 pt-2">
+        <h2 className="font-display text-ink text-lg font-semibold">
+          Comparer les formules
+        </h2>
+        <ComparisonMatrix />
+      </section>
     </div>
   );
 }
