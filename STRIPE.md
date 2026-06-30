@@ -43,24 +43,22 @@ STRIPE_WEBHOOK_SECRET="whsec_…"
 Le webhook synchronise statut, plan, période et **remet le quota SMS à zéro**
 à chaque nouvelle période de facturation.
 
-## 4. Dépassement facturé à l'usage (optionnel)
+## 4. Dépassement facturé à l'usage
 
-Pour facturer les SMS au-delà du forfait :
-
-1. Dashboard → Billing → **Meters** : créer un compteur, `event_name` au choix
-   (ex. `sms_overage`), clé client `stripe_customer_id`, agrégation « sum » sur
-   `value`.
-2. Créer un **prix metered** « par segment » (0,16 / 0,13 / 0,10 € selon le
-   plan) basé sur ce compteur, et l'ajouter comme 2ᵉ item du plan.
-3. Renseigner :
+Un **compteur** (Billing → Meters, `event_name = sms_overage`) + un **prix
+metered « par segment »** par plan (0,16 / 0,13 / 0,10 €). Le Checkout ajoute
+automatiquement ce prix comme 2ᵉ ligne de l'abonnement, et le scan reporte
+chaque segment de dépassement au compteur → facturé sur l'invoice du mois.
 
 ```
 STRIPE_OVERAGE_METER_EVENT="sms_overage"
+STRIPE_METER_PRICE_ESSENTIEL="price_…"
+STRIPE_METER_PRICE_PRO="price_…"
+STRIPE_METER_PRICE_MULTI="price_…"
 ```
 
-À chaque SMS envoyé au-delà du forfait, Revia reporte les segments à Stripe
-(`reportOverageSegments`). Laisser vide = pas de facturation du dépassement (les
-envois se mettent simplement en pause au plafond, géré en interne).
+Laisser ces 4 variables vides = pas de facturation du dépassement (les envois se
+mettent simplement en pause au plafond, géré en interne).
 
 ## 5. Prix fondateur (optionnel)
 

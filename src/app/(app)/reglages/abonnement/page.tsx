@@ -14,11 +14,10 @@ import { SubscribeButtons } from "@/components/app/subscribe-buttons";
 import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 import { QuotaMeter } from "@/components/app/quota-meter";
 import { OverageCapForm } from "@/components/app/overage-cap-form";
-import { RechargeButton } from "@/components/app/recharge-button";
 import { TrialBanner } from "@/components/app/trial-banner";
 import { formatDate } from "@/lib/dates";
 import { formatCentsPrecise } from "@/lib/money";
-import { getPlan, SUBSCRIPTION } from "@/config/brand";
+import { getPlan } from "@/config/brand";
 import { getQuotaStatus } from "@/lib/quota";
 import { getTrialStatus } from "@/lib/trial";
 
@@ -92,20 +91,6 @@ export default async function AbonnementPage() {
                 {formatCentsPrecise(quota.overageCents)} ; une fois le plafond
                 atteint, les envois se mettent en pause.
               </p>
-            </div>
-            <div className="border-line flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-              <p className="text-muted text-sm">
-                Besoin de plus de SMS ce mois ? Ajoutez un pack de{" "}
-                <span className="text-ink font-medium">
-                  {SUBSCRIPTION.rechargePack.segments}
-                </span>{" "}
-                segments.
-              </p>
-              <RechargeButton
-                segments={SUBSCRIPTION.rechargePack.segments}
-                priceCents={SUBSCRIPTION.rechargePack.priceCents}
-                stripeConfigured={stripeOn}
-              />
             </div>
           </div>
         ) : null}

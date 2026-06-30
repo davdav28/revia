@@ -62,6 +62,8 @@ export const SUBSCRIPTION = {
       consolidatedMultiSite: false,
       monthlyPriceEnvKey: "STRIPE_PRICE_ESSENTIEL_MONTHLY",
       annualPriceEnvKey: "STRIPE_PRICE_ESSENTIEL_ANNUAL",
+      // Prix « par segment » (facturation du dépassement à l'usage).
+      meterPriceEnvKey: "STRIPE_METER_PRICE_ESSENTIEL",
       highlight: false,
     },
     {
@@ -79,6 +81,7 @@ export const SUBSCRIPTION = {
       consolidatedMultiSite: true,
       monthlyPriceEnvKey: "STRIPE_PRICE_PRO_MONTHLY",
       annualPriceEnvKey: "STRIPE_PRICE_PRO_ANNUAL",
+      meterPriceEnvKey: "STRIPE_METER_PRICE_PRO",
       highlight: true,
     },
     {
@@ -97,6 +100,7 @@ export const SUBSCRIPTION = {
       consolidatedMultiSite: true,
       monthlyPriceEnvKey: "STRIPE_PRICE_MULTI_MONTHLY",
       annualPriceEnvKey: "STRIPE_PRICE_MULTI_ANNUAL",
+      meterPriceEnvKey: "STRIPE_METER_PRICE_MULTI",
       highlight: false,
     },
   ],

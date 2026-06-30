@@ -72,10 +72,17 @@ export async function startCheckout(
   // Coupon « prix fondateur » appliqué si configuré.
   const founderCoupon = process.env.STRIPE_FOUNDER_COUPON?.trim();
 
+  // Forfait + (si configuré) prix « par segment » pour facturer le dépassement.
+  const meterPriceId = process.env[plan.meterPriceEnvKey]?.trim();
+  const lineItems: { price: string; quantity?: number }[] = [
+    { price: priceId, quantity: 1 },
+  ];
+  if (meterPriceId) lineItems.push({ price: meterPriceId }); // metered : sans quantité
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: lineItems,
     success_url: `${appUrl()}/reglages/abonnement?success=1`,
     cancel_url: `${appUrl()}/reglages/abonnement?canceled=1`,
     metadata: { salonId: member.salonId, plan: plan.id, period },
