@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 import { BRAND } from "@/config/brand";
 
 /**
- * Le glyphe « boucle » : un anneau presque clos dont la queue revient vers le
- * début — la boucle du cycle de l'ongle qui se referme. Trait unique, rond,
- * en `currentColor` pour se décliner en --ink sur clair et --base sur foncé.
+ * Le glyphe « boucle » : une spirale qui s'enroule vers son centre — le cycle
+ * de l'ongle qui revient. Trait unique, rond, en rouge laque (identique au
+ * branding Stripe et aux logos `public/brand/`).
  */
 export function LogoMark({
   className,
@@ -13,7 +13,7 @@ export function LogoMark({
 }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 100 100"
+      viewBox="0 0 26 26"
       fill="none"
       role="img"
       aria-hidden
@@ -21,9 +21,9 @@ export function LogoMark({
       {...props}
     >
       <path
-        d="M61.6 18.1 A34 34 0 1 1 38.4 18.1 Q49 5.5 61 13.4"
-        stroke="currentColor"
-        strokeWidth={11}
+        d="M5 13c0-4.4 3.6-8 8-8s8 3.6 8 8c0 2.8-2.3 5-5 5-2.2 0-4-1.8-4-4 0-1.7 1.3-3 3-3"
+        stroke="var(--lacquer)"
+        strokeWidth={2.2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
