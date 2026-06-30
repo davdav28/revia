@@ -9,9 +9,11 @@ import { StatCard } from "@/components/app/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { RecoveredCounter } from "@/components/brand/recovered-counter";
 import { RecoveryChart } from "@/components/app/recovery-chart";
+import { QuotaBanner } from "@/components/app/quota-banner";
 import { Button } from "@/components/ui/button";
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
+import { getQuotaStatus } from "@/lib/quota";
 
 export const metadata: Metadata = { title: "Tableau de bord" };
 
@@ -222,6 +224,8 @@ export default async function DashboardPage() {
           </Button>
         ) : null}
       </div>
+
+      <QuotaBanner status={getQuotaStatus(member.salon)} />
 
       {/* Hero — le compteur signature */}
       <div className="border-line bg-surface rounded-xl border p-8 shadow-[var(--shadow-card)]">

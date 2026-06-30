@@ -11,9 +11,12 @@ import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SubscribeButtons } from "@/components/app/subscribe-buttons";
 import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
+import { QuotaMeter } from "@/components/app/quota-meter";
+import { OverageCapForm } from "@/components/app/overage-cap-form";
 import { formatDate } from "@/lib/dates";
 import { formatCentsPrecise } from "@/lib/money";
 import { getPlan } from "@/config/brand";
+import { getQuotaStatus } from "@/lib/quota";
 
 export const metadata: Metadata = { title: "Abonnement" };
 
@@ -23,7 +26,7 @@ export default async function AbonnementPage() {
   const active = isSubscriptionActive(salon.subscriptionStatus);
   const stripeOn = isStripeConfigured();
   const plan = getPlan(salon.plan);
-  const quota = (plan?.smsQuota ?? 0) + salon.rechargeSegments;
+  const quota = getQuotaStatus(salon);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -64,18 +67,17 @@ export default async function AbonnementPage() {
           </Badge>
         </div>
         {plan ? (
-          <>
-            <p className="tabular text-muted mt-2 text-sm">
-              SMS ce mois : {salon.smsUsedThisPeriod} / {quota} segments
-              {salon.rechargeSegments > 0
-                ? ` (dont ${salon.rechargeSegments} de recharge)`
-                : ""}
-            </p>
-            <p className="text-muted mt-1 text-sm">
-              Au-delà : {formatCentsPrecise(plan.overageCents)} le SMS, plafonné
-              à votre limite.
-            </p>
-          </>
+          <div className="mt-4 space-y-4">
+            <QuotaMeter status={quota} />
+            <div className="border-line border-t pt-4">
+              <OverageCapForm currentCents={salon.overageCapCents} />
+              <p className="text-muted mt-2 text-xs">
+                Au-delà de votre forfait, chaque SMS coûte{" "}
+                {formatCentsPrecise(quota.overageCents)} ; une fois le
+                plafond atteint, les envois se mettent en pause.
+              </p>
+            </div>
+          </div>
         ) : null}
         {salon.currentPeriodEnd ? (
           <p className="text-muted mt-2 text-sm">

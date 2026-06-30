@@ -26,6 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScanButton } from "@/components/reactivation/scan-button";
+import { QuotaBanner } from "@/components/app/quota-banner";
+import { getQuotaStatus } from "@/lib/quota";
 import { CampaignToggle } from "@/components/reactivation/campaign-toggle";
 import { TemplateEditDialog } from "@/components/reactivation/template-edit-dialog";
 import { formatCents } from "@/lib/money";
@@ -52,6 +54,7 @@ const STATUS_LABEL: Record<MessageStatus, string> = {
 export default async function RelancesPage() {
   const member = await requireMember();
   const salonId = member.salonId;
+  const quota = getQuotaStatus(member.salon);
 
   const [campaigns, templates, messages, recoveryAgg] = await Promise.all([
     prisma.campaign.findMany({
@@ -115,6 +118,8 @@ export default async function RelancesPage() {
           </div>
         }
       />
+
+      <QuotaBanner status={quota} />
 
       {!isRealMessagingConfigured() ? (
         <p className="border-status-at-risk/30 bg-status-at-risk/10 text-status-at-risk rounded-md border px-3 py-2 text-sm">

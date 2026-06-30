@@ -6,12 +6,15 @@ import type {
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { recomputeManyClientStats } from "@/lib/client-stats";
-import { getMessagingProvider } from "@/lib/messaging";
+import { getMessagingProvider, type MessagingProvider } from "@/lib/messaging";
 import { renderTemplate, scenarioFor } from "@/lib/templates";
 import { isWithinSendWindow } from "./send-window";
 import { optOutUrl } from "@/lib/opt-out";
 import { bookingUrl } from "@/lib/slug";
 import { isSubscriptionActive } from "@/lib/subscription";
+import { countSegments } from "@/lib/sms-segments";
+import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
+import { SUBSCRIPTION } from "@/config/brand";
 
 const DAY = 86_400_000;
 const MAX_PER_CAMPAIGN = 200;
@@ -24,12 +27,15 @@ export type ScanSummary = {
   recoveredAmountCents: number;
   messagesSent: number;
   messagesFailed: number;
+  smsSegmentsUsed: number;
+  quotaPaused: boolean;
   skipped: {
     optedOut: number;
     noConsent: number;
     cooldown: number;
     exhausted: number;
     noTemplate: number;
+    quotaCap: number;
   };
   sendWindowOpen: boolean;
   subscriptionActive: boolean;
@@ -92,8 +98,20 @@ export async function runScanForSalon(
   opts: { force?: boolean; now?: Date } = {},
 ): Promise<ScanSummary> {
   const now = opts.now ?? new Date();
-  const salon = await prisma.salon.findUnique({ where: { id: salonId } });
+  let salon = await prisma.salon.findUnique({ where: { id: salonId } });
   if (!salon) throw new Error("Salon introuvable.");
+
+  // Nouvelle période de quota écoulée → remise à zéro (compteur + alerte).
+  if (isQuotaPeriodElapsed(salon, now)) {
+    salon = await prisma.salon.update({
+      where: { id: salonId },
+      data: {
+        smsUsedThisPeriod: 0,
+        quotaPeriodStart: now,
+        quotaAlertSent: false,
+      },
+    });
+  }
 
   const summary: ScanSummary = {
     salonId,
@@ -102,12 +120,15 @@ export async function runScanForSalon(
     recoveredAmountCents: 0,
     messagesSent: 0,
     messagesFailed: 0,
+    smsSegmentsUsed: 0,
+    quotaPaused: false,
     skipped: {
       optedOut: 0,
       noConsent: 0,
       cooldown: 0,
       exhausted: 0,
       noTemplate: 0,
+      quotaCap: 0,
     },
     sendWindowOpen: opts.force ? true : isWithinSendWindow(now, salon.timezone),
     subscriptionActive: isSubscriptionActive(salon.subscriptionStatus),
@@ -178,6 +199,16 @@ export async function runScanForSalon(
   const provider = getMessagingProvider();
   // Lien de réservation en ligne (vide si désactivé) → variable {{lien}}.
   const lien = salon.bookingEnabled && salon.slug ? bookingUrl(salon.slug) : "";
+
+  // État du quota SMS pour la période. On décompte en segments et on met les
+  // envois SMS en pause si le plafond de dépassement est atteint.
+  const quota = getQuotaStatus(salon);
+  let quotaUsed = quota.used;
+  let alertSent = salon.quotaAlertSent;
+  const quotaTotal = quota.totalAllowed;
+  const alertThreshold = Math.ceil(
+    (quota.included * SUBSCRIPTION.quotaAlertPct) / 100,
+  );
 
   // Modèles actifs du salon, indexés par scénario|canal (pour la rotation).
   const activeTemplates = await prisma.messageTemplate.findMany({
@@ -282,6 +313,15 @@ export async function runScanForSalon(
         ? renderTemplate(template.subject, vars)
         : null;
 
+      // Décompte en segments (les emails ne consomment pas le quota SMS).
+      const segments = campaign.channel === "sms" ? countSegments(body) : 1;
+      // Plafond de dépassement atteint → les SMS passent en pause.
+      if (campaign.channel === "sms" && quotaUsed + segments > quotaTotal) {
+        summary.skipped.quotaCap++;
+        summary.quotaPaused = true;
+        continue;
+      }
+
       let result;
       let to: string;
       if (campaign.channel === "sms") {
@@ -313,6 +353,7 @@ export async function runScanForSalon(
           campaignId: campaign.id,
           templateId: template.id,
           channel: campaign.channel,
+          segments,
           to,
           subject,
           body,
@@ -325,6 +366,21 @@ export async function runScanForSalon(
       });
 
       if (result.ok) {
+        if (campaign.channel === "sms") {
+          quotaUsed += segments;
+          summary.smsSegmentsUsed += segments;
+          // Alerte 80 % (une seule fois par période), au propriétaire.
+          if (!alertSent && quotaUsed >= alertThreshold && quota.included > 0) {
+            alertSent = true;
+            await sendQuotaAlert(
+              salonId,
+              salon.name,
+              quotaUsed,
+              quota.included,
+              provider,
+            ).catch(() => {});
+          }
+        }
         await prisma.client.update({
           where: { id: client.id },
           data: { lastContactedAt: now },
@@ -336,7 +392,39 @@ export async function runScanForSalon(
     }
   }
 
+  // Persiste le compteur de quota + l'état de l'alerte de la période.
+  if (quotaUsed !== quota.used || alertSent !== salon.quotaAlertSent) {
+    await prisma.salon.update({
+      where: { id: salonId },
+      data: { smsUsedThisPeriod: quotaUsed, quotaAlertSent: alertSent },
+    });
+  }
+
   return summary;
+}
+
+/** Envoie l'alerte « 80 % du quota SMS atteint » au propriétaire (best-effort). */
+async function sendQuotaAlert(
+  salonId: string,
+  salonName: string,
+  used: number,
+  included: number,
+  provider: MessagingProvider,
+): Promise<void> {
+  const owner = await prisma.membership.findFirst({
+    where: { salonId, role: "owner" },
+    include: { user: { select: { email: true } } },
+  });
+  const to = owner?.user.email;
+  if (!to) return;
+  const pct = included > 0 ? Math.round((used / included) * 100) : 0;
+  await provider.sendEmail({
+    to,
+    subject: `${salonName} : ${pct}% de votre quota SMS utilisé`,
+    html: `<div><p>Bonjour,</p><p>Vous avez utilisé <strong>${used} / ${included}</strong> segments SMS sur votre forfait ce mois-ci (${pct}%).</p><p>Au-delà de l'inclus, chaque SMS est facturé selon votre formule, dans la limite du plafond que vous avez fixé — ensuite les envois se mettent en pause. Pensez à recharger ou ajuster votre plafond si besoin.</p><p>— Revia</p></div>`,
+    senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
+    senderName: salonName,
+  });
 }
 
 /** Lance le scan pour tous les salons (cron quotidien). */

@@ -99,6 +99,22 @@ export async function openBillingPortal(): Promise<CheckoutResult> {
   return { url: session.url };
 }
 
+/** Règle le plafond de dépassement mensuel (en euros). */
+export async function setOverageCap(
+  euros: number,
+): Promise<{ error?: string } | { ok: true }> {
+  const member = await requireMember();
+  if (!Number.isFinite(euros) || euros < 0 || euros > 1000) {
+    return { error: "Plafond invalide (0 à 1000 €)." };
+  }
+  await prisma.salon.update({
+    where: { id: member.salonId },
+    data: { overageCapCents: Math.round(euros * 100) },
+  });
+  revalidatePath("/reglages/abonnement");
+  return { ok: true };
+}
+
 /** Résiliation simulée (mode démo uniquement). */
 export async function cancelSubscriptionDev(): Promise<void> {
   const member = await requireMember();
