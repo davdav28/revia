@@ -11,6 +11,10 @@ import { RecoveredCounter } from "@/components/brand/recovered-counter";
 import { RecoveryChart } from "@/components/app/recovery-chart";
 import { QuotaBanner } from "@/components/app/quota-banner";
 import { TrialBanner } from "@/components/app/trial-banner";
+import {
+  OnboardingChecklist,
+  type OnboardingStep,
+} from "@/components/app/onboarding-checklist";
 import { Button } from "@/components/ui/button";
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
@@ -104,6 +108,42 @@ export default async function DashboardPage() {
     <QuotaBanner status={quotaStatus} />
   );
 
+  // Onboarding : checklist « Premiers pas » tant que la mise en route n'est pas
+  // terminée (clientes importées → relance activée → adresse renseignée).
+  const activeCampaignCount = await prisma.campaign.count({
+    where: { salonId, isActive: true },
+  });
+  const onboardingSteps: OnboardingStep[] = [
+    {
+      key: "clients",
+      done: total > 0,
+      title: "Importer vos clientes",
+      desc: "Sans elles, Revia n'a personne à relancer.",
+      href: "/clientes/import",
+      cta: "Importer",
+    },
+    {
+      key: "relance",
+      done: activeCampaignCount > 0,
+      title: "Activer une relance",
+      desc: "Activez une campagne pour que les messages partent automatiquement.",
+      href: "/relances",
+      cta: "Activer",
+    },
+    {
+      key: "adresse",
+      done: !!member.salon.address,
+      title: "Compléter votre page de réservation",
+      desc: "Ajoutez l'adresse et le téléphone du salon.",
+      href: "/reglages",
+      cta: "Compléter",
+    },
+  ];
+  const onboardingDone = onboardingSteps.every((s) => s.done);
+  const onboarding = onboardingDone ? null : (
+    <OnboardingChecklist steps={onboardingSteps} />
+  );
+
   if (total === 0) {
     return (
       <div className="mx-auto max-w-5xl space-y-8">
@@ -122,6 +162,7 @@ export default async function DashboardPage() {
           ) : null}
         </div>
         {billingBanner}
+        {onboarding}
         <EmptyState
           icon={Users}
           title="Votre tableau de bord prend vie avec vos clientes"
@@ -246,6 +287,7 @@ export default async function DashboardPage() {
       </div>
 
       {billingBanner}
+      {onboarding}
 
       {/* Hero — le compteur signature */}
       <div className="border-line bg-surface rounded-xl border p-8 shadow-[var(--shadow-card)]">
