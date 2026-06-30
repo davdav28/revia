@@ -12,6 +12,15 @@ export function seatLimitFor(salon: {
   return (plan ?? getPlan(HIGHLIGHTED_PLAN_ID)!).maxUsers;
 }
 
+/**
+ * Nombre de salons autorisés pour le compte. `null` = illimité. Basé sur le
+ * plan du salon actif ; pendant l'essai, on autorise le plan mis en avant.
+ */
+export function salonLimitFor(salon: { plan: string | null }): number | null {
+  const plan = getPlan(salon.plan);
+  return (plan ?? getPlan(HIGHLIGHTED_PLAN_ID)!).maxSalons;
+}
+
 /** URL d'acceptation d'une invitation. */
 export function joinUrl(token: string): string {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

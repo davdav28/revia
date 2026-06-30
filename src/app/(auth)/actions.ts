@@ -68,18 +68,25 @@ export async function signupAction(
         data: {
           name: salonName,
           slug,
-          users: {
-            create: {
-              authId: data.user.id,
-              email,
-              name: name || null,
-              role: "owner",
-            },
-          },
           // Catalogue de prestations onglerie pré-rempli.
           services: { create: DEFAULT_SERVICES },
         },
         select: { id: true },
+      });
+      // Crée le membre owner + son accès (membership), salon actif par défaut.
+      const owner = await prisma.user.create({
+        data: {
+          authId: data.user.id,
+          email,
+          name: name || null,
+          role: "owner",
+          salonId: salon.id,
+          activeSalonId: salon.id,
+        },
+        select: { id: true },
+      });
+      await prisma.membership.create({
+        data: { userId: owner.id, salonId: salon.id, role: "owner" },
       });
       // Modèles de messages + campagnes de relance par défaut.
       await seedReactivationDefaults(salon.id);

@@ -98,6 +98,7 @@ model Salon {
   updatedAt DateTime @updatedAt
 
   users        User[]
+  memberships  Membership[]
   invitations  Invitation[]
   clients      Client[]
   services     Service[]
@@ -130,20 +131,43 @@ model Invitation {
   @@index([salonId])
 }
 
-/// Membre d'un salon. Relié à l'utilisateur Supabase Auth via authId.
+/// Utilisateur (compte d'authentification Supabase via authId).
+/// L'accès aux salons passe par `Membership` (un user peut gérer plusieurs
+/// salons). `salonId`/`role` = salon d'origine (legacy/home) ; `activeSalonId`
+/// = salon actuellement consulté.
 model User {
   id        String   @id @default(cuid())
   authId    String   @unique
   email     String
   name      String?
-  role      UserRole @default(owner)
+  role      UserRole @default(owner) // rôle dans le salon d'origine (legacy)
+  activeSalonId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   salon   Salon  @relation(fields: [salonId], references: [id], onDelete: Cascade)
   salonId String
 
+  memberships Membership[]
+
   @@index([salonId])
+}
+
+/// Accès d'un utilisateur à un salon, avec son rôle dans ce salon.
+/// Source de vérité pour « qui peut accéder à quel salon ».
+model Membership {
+  id        String   @id @default(cuid())
+  role      UserRole @default(staff)
+  createdAt DateTime @default(now())
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  salon   Salon  @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId String
+
+  @@unique([userId, salonId])
+  @@index([salonId])
+  @@index([userId])
 }
 
 /// Prestation proposée par le salon. `defaultIntervalDays` = cycle de retour

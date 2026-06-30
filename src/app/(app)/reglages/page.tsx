@@ -39,7 +39,7 @@ export default async function ReglagesPage() {
   const member = await requireMember();
   const [servicesCount, usersCount] = await Promise.all([
     prisma.service.count({ where: { salonId: member.salonId } }),
-    prisma.user.count({ where: { salonId: member.salonId } }),
+    prisma.membership.count({ where: { salonId: member.salonId } }),
   ]);
 
   return (

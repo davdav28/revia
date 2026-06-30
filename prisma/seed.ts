@@ -169,6 +169,22 @@ async function main() {
       },
     }));
 
+  // Garantit l'accès (membership) + le salon actif pour l'utilisateur démo.
+  const demoUser = await prisma.user.findUnique({ where: { authId } });
+  if (demoUser) {
+    await prisma.membership.upsert({
+      where: { userId_salonId: { userId: demoUser.id, salonId: salon.id } },
+      create: { userId: demoUser.id, salonId: salon.id, role: "owner" },
+      update: {},
+    });
+    if (!demoUser.activeSalonId) {
+      await prisma.user.update({
+        where: { id: demoUser.id },
+        data: { activeSalonId: salon.id },
+      });
+    }
+  }
+
   const now = new Date();
   const TOTAL = 80;
 

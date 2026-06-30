@@ -7,7 +7,9 @@ import { Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
 import { NAV_ITEMS, SECONDARY_NAV, type NavItem } from "./nav";
+import { SalonSwitcher } from "./salon-switcher";
 import { logoutAction } from "@/app/(auth)/actions";
+import type { AccessibleSalon } from "@/lib/auth";
 
 function NavLink({
   item,
@@ -76,11 +78,15 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function AppShell({
-  salonName,
+  salons,
+  activeSalonId,
+  canAddSalon,
   userLabel,
   children,
 }: {
-  salonName: string;
+  salons: AccessibleSalon[];
+  activeSalonId: string;
+  canAddSalon: boolean;
   userLabel: string;
   children: React.ReactNode;
 }) {
@@ -128,9 +134,11 @@ export function AppShell({
           </button>
 
           <div className="min-w-0 flex-1">
-            <p className="font-display text-ink truncate font-semibold">
-              {salonName}
-            </p>
+            <SalonSwitcher
+              salons={salons}
+              activeSalonId={activeSalonId}
+              canAddSalon={canAddSalon}
+            />
           </div>
 
           <span className="text-muted hidden text-sm sm:inline">

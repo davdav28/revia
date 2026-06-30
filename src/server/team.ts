@@ -17,10 +17,10 @@ export type InviteResult =
   | { ok: true; link: string; emailSent: boolean }
   | { error: string };
 
-/** Sièges occupés = membres + invitations en attente. */
+/** Sièges occupés = membres (memberships) + invitations en attente. */
 async function usedSeats(salonId: string): Promise<number> {
   const [members, pending] = await Promise.all([
-    prisma.user.count({ where: { salonId } }),
+    prisma.membership.count({ where: { salonId } }),
     prisma.invitation.count({ where: { salonId, status: "pending" } }),
   ]);
   return members + pending;
@@ -38,9 +38,9 @@ export async function inviteMember(
   }
   const normEmail = parsed.data.email.toLowerCase();
 
-  // Déjà membre ?
-  const already = await prisma.user.findFirst({
-    where: { salonId: member.salonId, email: normEmail },
+  // Déjà membre de ce salon ?
+  const already = await prisma.membership.findFirst({
+    where: { salonId: member.salonId, user: { email: normEmail } },
     select: { id: true },
   });
   if (already) return { error: "Cette personne fait déjà partie de l'équipe." };
@@ -111,31 +111,37 @@ export async function revokeInvitation(invitationId: string): Promise<void> {
   revalidatePath("/reglages/equipe");
 }
 
-/** Change le rôle d'un membre (propriétaire). Empêche de retirer le dernier propriétaire. */
+/** Change le rôle d'un membre dans le salon actif (propriétaire). */
 export async function changeMemberRole(
   userId: string,
   role: "owner" | "staff",
 ): Promise<{ error?: string }> {
   const member = await requireOwner();
-  const target = await prisma.user.findFirst({
-    where: { id: userId, salonId: member.salonId },
+  const target = await prisma.membership.findUnique({
+    where: { userId_salonId: { userId, salonId: member.salonId } },
   });
   if (!target) return { error: "Membre introuvable." };
 
   if (target.role === "owner" && role !== "owner") {
-    const owners = await prisma.user.count({
+    const owners = await prisma.membership.count({
       where: { salonId: member.salonId, role: "owner" },
     });
     if (owners <= 1)
       return { error: "Il doit rester au moins un propriétaire." };
   }
 
-  await prisma.user.update({ where: { id: target.id }, data: { role } });
+  await prisma.membership.update({
+    where: { userId_salonId: { userId, salonId: member.salonId } },
+    data: { role },
+  });
   revalidatePath("/reglages/equipe");
   return {};
 }
 
-/** Retire un membre du salon : supprime son accès (User + compte Supabase). */
+/**
+ * Retire un membre du salon actif : supprime son accès (membership). Si c'était
+ * son seul salon, on supprime aussi son compte (User + Supabase Auth).
+ */
 export async function removeMember(
   userId: string,
 ): Promise<{ error?: string }> {
@@ -143,29 +149,42 @@ export async function removeMember(
   if (userId === member.id)
     return { error: "Vous ne pouvez pas vous retirer vous-même." };
 
-  const target = await prisma.user.findFirst({
-    where: { id: userId, salonId: member.salonId },
+  const target = await prisma.membership.findUnique({
+    where: { userId_salonId: { userId, salonId: member.salonId } },
+    include: { user: { include: { _count: { select: { memberships: true } } } } },
   });
   if (!target) return { error: "Membre introuvable." };
 
   if (target.role === "owner") {
-    const owners = await prisma.user.count({
+    const owners = await prisma.membership.count({
       where: { salonId: member.salonId, role: "owner" },
     });
     if (owners <= 1)
       return { error: "Il doit rester au moins un propriétaire." };
   }
 
-  await prisma.user.delete({ where: { id: target.id } });
+  // Retire l'accès à ce salon.
+  await prisma.membership.delete({
+    where: { userId_salonId: { userId, salonId: member.salonId } },
+  });
 
-  // Supprime le compte d'authentification Supabase (best-effort).
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (url && key) {
-    await fetch(`${url}/auth/v1/admin/users/${target.authId}`, {
-      method: "DELETE",
-      headers: { apikey: key, Authorization: `Bearer ${key}` },
-    }).catch(() => {});
+  // Si c'était son unique salon, on supprime le compte entièrement.
+  if (target.user._count.memberships <= 1) {
+    await prisma.user.delete({ where: { id: userId } });
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (url && key) {
+      await fetch(`${url}/auth/v1/admin/users/${target.user.authId}`, {
+        method: "DELETE",
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+      }).catch(() => {});
+    }
+  } else if (target.user.activeSalonId === member.salonId) {
+    // Sinon, si ce salon était son salon actif, on le réinitialise.
+    await prisma.user.update({
+      where: { id: userId },
+      data: { activeSalonId: null },
+    });
   }
 
   revalidatePath("/reglages/equipe");
@@ -224,20 +243,29 @@ export async function acceptInvitationAction(
     if (!data.user) return { error: "Inscription impossible. Réessayez." };
 
     // Rattache le membre au salon invitant (idempotent sur authId).
-    const existing = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { authId: data.user.id },
     });
-    if (!existing) {
-      await prisma.user.create({
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
         data: {
           authId: data.user.id,
           email: invite.email,
           name: parsed.data.name || null,
           role: invite.role,
           salonId: invite.salonId,
+          activeSalonId: invite.salonId,
         },
       });
     }
+    // Accès au salon (membership) + salon actif.
+    await prisma.membership.upsert({
+      where: {
+        userId_salonId: { userId: dbUser.id, salonId: invite.salonId },
+      },
+      create: { userId: dbUser.id, salonId: invite.salonId, role: invite.role },
+      update: { role: invite.role },
+    });
     await prisma.invitation.update({
       where: { id: invite.id },
       data: { status: "accepted", acceptedAt: new Date() },

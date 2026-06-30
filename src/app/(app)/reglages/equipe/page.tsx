@@ -17,16 +17,10 @@ export default async function EquipePage() {
   const isOwner = member.role === "owner";
 
   const [members, invitations] = await Promise.all([
-    prisma.user.findMany({
+    prisma.membership.findMany({
       where: { salonId: member.salonId },
       orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
+      include: { user: { select: { id: true, name: true, email: true } } },
     }),
     prisma.invitation.findMany({
       where: { salonId: member.salonId, status: "pending" },
@@ -101,12 +95,12 @@ export default async function EquipePage() {
             <MemberRow
               key={m.id}
               member={{
-                id: m.id,
-                name: m.name,
-                email: m.email,
+                id: m.user.id,
+                name: m.user.name,
+                email: m.user.email,
                 role: m.role,
               }}
-              isCurrentUser={m.id === member.id}
+              isCurrentUser={m.user.id === member.id}
               canManage={isOwner}
             />
           ))}

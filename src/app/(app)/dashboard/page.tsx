@@ -86,10 +86,20 @@ export default async function DashboardPage() {
   if (total === 0) {
     return (
       <div className="mx-auto max-w-5xl space-y-8">
-        <PageHeader
-          title="Tableau de bord"
-          description={`Voici l'activité de ${member.salon.name}.`}
-        />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <PageHeader
+            title="Tableau de bord"
+            description={`Voici l'activité de ${member.salon.name}.`}
+          />
+          {member.salons.length > 1 ? (
+            <Button variant="secondary" size="sm" asChild>
+              <Link href="/dashboard/consolide">
+                <TrendingUp className="size-4" />
+                Tous mes salons
+              </Link>
+            </Button>
+          ) : null}
+        </div>
         <EmptyState
           icon={Users}
           title="Votre tableau de bord prend vie avec vos clientes"
@@ -194,14 +204,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <PageHeader
-        title="Tableau de bord"
-        description={
-          firstName
-            ? `Bonjour ${firstName}, voici ce que ${BRAND.name} vous rapporte.`
-            : `Voici ce que ${BRAND.name} vous rapporte.`
-        }
-      />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <PageHeader
+          title="Tableau de bord"
+          description={
+            firstName
+              ? `Bonjour ${firstName}, voici ce que ${BRAND.name} vous rapporte.`
+              : `Voici ce que ${BRAND.name} vous rapporte.`
+          }
+        />
+        {member.salons.length > 1 ? (
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/dashboard/consolide">
+              <TrendingUp className="size-4" />
+              Tous mes salons
+            </Link>
+          </Button>
+        ) : null}
+      </div>
 
       {/* Hero — le compteur signature */}
       <div className="border-line bg-surface rounded-xl border p-8 shadow-[var(--shadow-card)]">
