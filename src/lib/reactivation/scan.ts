@@ -14,6 +14,7 @@ import { bookingUrl } from "@/lib/slug";
 import { isSubscriptionActive } from "@/lib/subscription";
 import { countSegments } from "@/lib/sms-segments";
 import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
+import { reportOverageSegments } from "@/lib/billing-usage";
 import { SUBSCRIPTION } from "@/config/brand";
 
 const DAY = 86_400_000;
@@ -367,8 +368,19 @@ export async function runScanForSalon(
 
       if (result.ok) {
         if (campaign.channel === "sms") {
+          const usedBefore = quotaUsed;
           quotaUsed += segments;
           summary.smsSegmentsUsed += segments;
+          // Segments tombant en dépassement → reportés à Stripe (metered).
+          const overageDelta =
+            Math.max(0, quotaUsed - quota.included) -
+            Math.max(0, usedBefore - quota.included);
+          if (overageDelta > 0) {
+            await reportOverageSegments(
+              salon.stripeCustomerId,
+              overageDelta,
+            ).catch(() => {});
+          }
           // Alerte 80 % (une seule fois par période), au propriétaire.
           if (!alertSent && quotaUsed >= alertThreshold && quota.included > 0) {
             alertSent = true;
