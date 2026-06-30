@@ -33,7 +33,7 @@ const BULLETS: Record<PlanId, string[]> = {
 const CTA: Record<PlanId, { label: string; href: string }> = {
   essentiel: { label: "Commencer l'essai", href: "/signup" },
   pro: { label: "Commencer l'essai", href: "/signup" },
-  multi: { label: "Parler à l'équipe", href: "mailto:contact@revia.app" },
+  multi: { label: "Parler à l'équipe", href: "mailto:contact@reviagence.com" },
 };
 
 export function PricingCards() {

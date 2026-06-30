@@ -89,7 +89,7 @@ export async function inviteMember(
       to: normEmail,
       subject: `${member.salon.name} vous invite à rejoindre ${BRAND.name}`,
       html: `<div><p>Bonjour,</p><p>${member.name ? `${member.name} (` : ""}${member.salon.name}${member.name ? ")" : ""} vous invite à rejoindre son équipe sur ${BRAND.name}.</p><p><a href="${link}">Rejoindre l'équipe</a></p><p>Ce lien expire dans ${INVITE_TTL_DAYS} jours.</p></div>`,
-      senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
+      senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@reviagence.com",
       senderName: BRAND.name,
     });
     emailSent = res.ok;

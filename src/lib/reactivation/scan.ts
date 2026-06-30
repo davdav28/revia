@@ -362,7 +362,7 @@ export async function runScanForSalon(
           to,
           subject: subject ?? salon.name,
           html,
-          senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
+          senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@reviagence.com",
           senderName: salon.senderName,
         });
       }
@@ -454,7 +454,7 @@ async function sendQuotaAlert(
     to,
     subject: `${salonName} : ${pct}% de votre quota SMS utilisé`,
     html: `<div><p>Bonjour,</p><p>Vous avez utilisé <strong>${used} / ${included}</strong> segments SMS sur votre forfait ce mois-ci (${pct}%).</p><p>Au-delà de l'inclus, chaque SMS est facturé selon votre formule, dans la limite du plafond que vous avez fixé — ensuite les envois se mettent en pause. Pensez à recharger ou ajuster votre plafond si besoin.</p><p>— Revia</p></div>`,
-    senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
+    senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@reviagence.com",
     senderName: salonName,
   });
 }

@@ -181,7 +181,7 @@ export async function createPublicBooking(
         to: email,
         subject: `Votre rendez-vous au ${salon.name} est confirmé`,
         html: `<div><p>Bonjour ${d.firstName},</p><p>Votre rendez-vous est confirmé :</p><p><strong>${service.name}</strong><br>${dateLabel}</p>${salon.address ? `<p>📍 ${salon.address}</p>` : ""}${salon.phone ? `<p>📞 ${salon.phone}</p>` : ""}<p>À très vite,<br>${salon.name}</p></div>`,
-        senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@revia.app",
+        senderEmail: process.env.BREVO_EMAIL_SENDER ?? "contact@reviagence.com",
         senderName: salon.senderName,
       });
     } else if (phone) {
