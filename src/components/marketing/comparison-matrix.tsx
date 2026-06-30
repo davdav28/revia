@@ -110,7 +110,7 @@ const GROUPS: Group[] = [
       { label: "A/B testing des messages", cells: [true, true, true] },
       { label: "Page de réservation en ligne", cells: [true, true, true] },
       {
-        label: "Synchro agenda (Planity / Treatwell / Fresha)",
+        label: "Import agenda (Planity / Treatwell / Fresha)",
         cells: [true, true, true],
       },
       {

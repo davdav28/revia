@@ -20,7 +20,7 @@ const BULLETS: Record<PlanId, string[]> = {
     "Tout l'Essentiel, en plus large",
     "Jusqu'à 2 salons · 5 utilisateurs",
     "Dashboard consolidé multi-sites",
-    "Synchro Planity · Treatwell · Fresha",
+    "Import Planity · Treatwell · Fresha",
     "Support prioritaire",
   ],
   multi: [
