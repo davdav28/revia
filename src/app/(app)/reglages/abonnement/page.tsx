@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireMember } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { isStripeConfigured } from "@/lib/stripe";
 import {
   isSubscriptionActive,
@@ -13,10 +14,13 @@ import { SubscribeButtons } from "@/components/app/subscribe-buttons";
 import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 import { QuotaMeter } from "@/components/app/quota-meter";
 import { OverageCapForm } from "@/components/app/overage-cap-form";
+import { RechargeButton } from "@/components/app/recharge-button";
+import { TrialBanner } from "@/components/app/trial-banner";
 import { formatDate } from "@/lib/dates";
 import { formatCentsPrecise } from "@/lib/money";
-import { getPlan } from "@/config/brand";
+import { getPlan, SUBSCRIPTION } from "@/config/brand";
 import { getQuotaStatus } from "@/lib/quota";
+import { getTrialStatus } from "@/lib/trial";
 
 export const metadata: Metadata = { title: "Abonnement" };
 
@@ -27,6 +31,16 @@ export default async function AbonnementPage() {
   const stripeOn = isStripeConfigured();
   const plan = getPlan(salon.plan);
   const quota = getQuotaStatus(salon);
+
+  let trialRecoveredCents = 0;
+  if (salon.subscriptionStatus === "trial") {
+    const agg = await prisma.recovery.aggregate({
+      where: { salonId: salon.id, recoveredAt: { gte: salon.createdAt } },
+      _sum: { recoveredAmountCents: true },
+    });
+    trialRecoveredCents = agg._sum.recoveredAmountCents ?? 0;
+  }
+  const trial = getTrialStatus(salon, trialRecoveredCents);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -49,6 +63,8 @@ export default async function AbonnementPage() {
           Ajoutez vos clés Stripe pour facturer pour de vrai.
         </p>
       ) : null}
+
+      <TrialBanner trial={trial} segmentsLeft={quota.remaining} />
 
       <div className="border-line bg-surface rounded-lg border p-5">
         <div className="flex items-center justify-between gap-4">
@@ -73,9 +89,23 @@ export default async function AbonnementPage() {
               <OverageCapForm currentCents={salon.overageCapCents} />
               <p className="text-muted mt-2 text-xs">
                 Au-delà de votre forfait, chaque SMS coûte{" "}
-                {formatCentsPrecise(quota.overageCents)} ; une fois le
-                plafond atteint, les envois se mettent en pause.
+                {formatCentsPrecise(quota.overageCents)} ; une fois le plafond
+                atteint, les envois se mettent en pause.
               </p>
+            </div>
+            <div className="border-line flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+              <p className="text-muted text-sm">
+                Besoin de plus de SMS ce mois ? Ajoutez un pack de{" "}
+                <span className="text-ink font-medium">
+                  {SUBSCRIPTION.rechargePack.segments}
+                </span>{" "}
+                segments.
+              </p>
+              <RechargeButton
+                segments={SUBSCRIPTION.rechargePack.segments}
+                priceCents={SUBSCRIPTION.rechargePack.priceCents}
+                stripeConfigured={stripeOn}
+              />
             </div>
           </div>
         ) : null}

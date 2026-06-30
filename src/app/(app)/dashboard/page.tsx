@@ -10,10 +10,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { RecoveredCounter } from "@/components/brand/recovered-counter";
 import { RecoveryChart } from "@/components/app/recovery-chart";
 import { QuotaBanner } from "@/components/app/quota-banner";
+import { TrialBanner } from "@/components/app/trial-banner";
 import { Button } from "@/components/ui/button";
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { getQuotaStatus } from "@/lib/quota";
+import { getTrialStatus } from "@/lib/trial";
 
 export const metadata: Metadata = { title: "Tableau de bord" };
 
@@ -85,6 +87,23 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  // Bandeau facturation : essai (progression 30 j / 300 €) ou quota.
+  const quotaStatus = getQuotaStatus(member.salon);
+  let trialRecoveredCents = 0;
+  if (member.salon.subscriptionStatus === "trial") {
+    const agg = await prisma.recovery.aggregate({
+      where: { salonId, recoveredAt: { gte: member.salon.createdAt } },
+      _sum: { recoveredAmountCents: true },
+    });
+    trialRecoveredCents = agg._sum.recoveredAmountCents ?? 0;
+  }
+  const trial = getTrialStatus(member.salon, trialRecoveredCents, now);
+  const billingBanner = trial.isTrial ? (
+    <TrialBanner trial={trial} segmentsLeft={quotaStatus.remaining} />
+  ) : (
+    <QuotaBanner status={quotaStatus} />
+  );
+
   if (total === 0) {
     return (
       <div className="mx-auto max-w-5xl space-y-8">
@@ -102,6 +121,7 @@ export default async function DashboardPage() {
             </Button>
           ) : null}
         </div>
+        {billingBanner}
         <EmptyState
           icon={Users}
           title="Votre tableau de bord prend vie avec vos clientes"
@@ -225,7 +245,7 @@ export default async function DashboardPage() {
         ) : null}
       </div>
 
-      <QuotaBanner status={getQuotaStatus(member.salon)} />
+      {billingBanner}
 
       {/* Hero — le compteur signature */}
       <div className="border-line bg-surface rounded-xl border p-8 shadow-[var(--shadow-card)]">

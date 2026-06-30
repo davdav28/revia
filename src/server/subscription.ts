@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
-import { getPlan, type BillingPeriod } from "@/config/brand";
+import { BRAND, SUBSCRIPTION, getPlan, type BillingPeriod } from "@/config/brand";
 
 const DAY = 86_400_000;
 
@@ -69,6 +69,9 @@ export async function startCheckout(
     });
   }
 
+  // Coupon « prix fondateur » appliqué si configuré.
+  const founderCoupon = process.env.STRIPE_FOUNDER_COUPON?.trim();
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
@@ -78,6 +81,66 @@ export async function startCheckout(
     metadata: { salonId: member.salonId, plan: plan.id, period },
     subscription_data: {
       metadata: { salonId: member.salonId, plan: plan.id, period },
+    },
+    ...(founderCoupon ? { discounts: [{ coupon: founderCoupon }] } : {}),
+  });
+
+  if (!session.url) return { error: "Impossible de démarrer le paiement." };
+  return { url: session.url };
+}
+
+/**
+ * Achat d'un pack de recharge SMS (segments prépayés, sans expiration).
+ * Démo : on crédite directement. Réel : Checkout Stripe (paiement unique),
+ * le webhook crédite à la confirmation.
+ */
+export async function buyRecharge(): Promise<CheckoutResult> {
+  const member = await requireMember();
+  const stripe = getStripe();
+  const pack = SUBSCRIPTION.rechargePack;
+
+  if (!stripe) {
+    await prisma.salon.update({
+      where: { id: member.salonId },
+      data: { rechargeSegments: { increment: pack.segments } },
+    });
+    revalidatePath("/reglages/abonnement");
+    return { ok: true };
+  }
+
+  let customerId = member.salon.stripeCustomerId;
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: member.email,
+      name: member.salon.name,
+      metadata: { salonId: member.salonId },
+    });
+    customerId = customer.id;
+    await prisma.salon.update({
+      where: { id: member.salonId },
+      data: { stripeCustomerId: customerId },
+    });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer: customerId,
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          unit_amount: pack.priceCents,
+          product_data: { name: `Recharge ${pack.segments} SMS — ${BRAND.name}` },
+        },
+        quantity: 1,
+      },
+    ],
+    success_url: `${appUrl()}/reglages/abonnement?recharge=1`,
+    cancel_url: `${appUrl()}/reglages/abonnement`,
+    metadata: {
+      salonId: member.salonId,
+      kind: "recharge",
+      segments: String(pack.segments),
     },
   });
 

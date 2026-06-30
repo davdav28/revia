@@ -62,7 +62,24 @@ STRIPE_OVERAGE_METER_EVENT="sms_overage"
 (`reportOverageSegments`). Laisser vide = pas de facturation du dépassement (les
 envois se mettent simplement en pause au plafond, géré en interne).
 
-## 5. Sur Vercel
+## 5. Prix fondateur (optionnel)
+
+Dashboard → Coupons : créer un coupon (ex. -30 % à vie, ou montant fixe), puis
+renseigner son ID :
+
+```
+STRIPE_FOUNDER_COUPON="abc123"
+```
+
+Il est appliqué automatiquement à l'abonnement au moment du Checkout.
+
+## 6. Recharges de SMS
+
+Aucune config supplémentaire : le pack de recharge (montant dans
+`SUBSCRIPTION.rechargePack`) est facturé via un paiement unique Checkout, et
+crédité par le webhook `checkout.session.completed` (metadata `kind=recharge`).
+
+## 7. Sur Vercel
 
 Coller toutes ces variables dans Project → Settings → Environment Variables,
 puis redéployer. Tester un paiement avec une carte de test

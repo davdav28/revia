@@ -83,6 +83,19 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const salonId = session.metadata?.salonId;
+
+        // Achat d'un pack de recharge (paiement unique) → on crédite.
+        if (session.metadata?.kind === "recharge") {
+          const segs = Number(session.metadata.segments ?? 0);
+          if (salonId && segs > 0) {
+            await prisma.salon.update({
+              where: { id: salonId },
+              data: { rechargeSegments: { increment: segs } },
+            });
+          }
+          break;
+        }
+
         if (salonId && session.subscription) {
           const sub = await stripe.subscriptions.retrieve(
             String(session.subscription),

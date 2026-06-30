@@ -14,6 +14,7 @@ import { bookingUrl } from "@/lib/slug";
 import { isSubscriptionActive } from "@/lib/subscription";
 import { countSegments } from "@/lib/sms-segments";
 import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
+import { getTrialStatus } from "@/lib/trial";
 import { reportOverageSegments } from "@/lib/billing-usage";
 import { SUBSCRIPTION } from "@/config/brand";
 
@@ -191,6 +192,20 @@ export async function runScanForSalon(
     });
     summary.recoveriesCreated++;
     summary.recoveredAmountCents += amount;
+  }
+
+  // Essai terminé (30 jours OU 300 € récupérés) → on bloque les nouveaux envois.
+  if (summary.subscriptionActive && salon.subscriptionStatus === "trial") {
+    const recAgg = await prisma.recovery.aggregate({
+      where: { salonId, recoveredAt: { gte: salon.createdAt } },
+      _sum: { recoveredAmountCents: true },
+    });
+    const trial = getTrialStatus(
+      salon,
+      recAgg._sum.recoveredAmountCents ?? 0,
+      now,
+    );
+    if (trial.expired) summary.subscriptionActive = false;
   }
 
   // C. Envoie les relances (abonnement actif requis + plage horaire).
