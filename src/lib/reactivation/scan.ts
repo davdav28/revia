@@ -311,6 +311,7 @@ export async function runScanForSalon(
           salonId,
           clientId: client.id,
           campaignId: campaign.id,
+          templateId: template.id,
           channel: campaign.channel,
           to,
           subject,

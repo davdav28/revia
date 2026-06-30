@@ -270,6 +270,7 @@ model MessageTemplate {
   salon     Salon      @relation(fields: [salonId], references: [id], onDelete: Cascade)
   salonId   String
   campaigns Campaign[]
+  messages  Message[]
 
   @@index([salonId])
 }
@@ -316,11 +317,15 @@ model Message {
   clientId   String
   campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   campaignId String?
+  // Modèle (variante) utilisé pour cet envoi — pour le test A/B.
+  template   MessageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  templateId String?
   recovery   Recovery?
 
   @@index([salonId])
   @@index([clientId])
   @@index([salonId, createdAt])
+  @@index([templateId])
 }
 
 /// Suggestion ou demande d'aide du salon — capturée pour améliorer le produit.

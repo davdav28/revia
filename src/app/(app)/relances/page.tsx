@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Send } from "lucide-react";
+import Link from "next/link";
+import { Send, BarChart3 } from "lucide-react";
 import type { CampaignTrigger, MessageStatus } from "@prisma/client";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -102,7 +103,17 @@ export default async function RelancesPage() {
       <PageHeader
         title="Relances"
         description="Vos campagnes de réactivation et leurs résultats."
-        actions={<ScanButton />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" size="sm" asChild>
+              <Link href="/relances/performances">
+                <BarChart3 className="size-4" />
+                Performance des messages
+              </Link>
+            </Button>
+            <ScanButton />
+          </div>
+        }
       />
 
       {!isRealMessagingConfigured() ? (
