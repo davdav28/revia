@@ -7,11 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SuggestionForm } from "@/components/app/suggestion-form";
 import { formatDate } from "@/lib/dates";
+import { LEGAL } from "@/config/legal";
 
 export const metadata: Metadata = { title: "Aide & suggestions" };
 
-// Contact support — à remplacer par votre vraie adresse.
-const SUPPORT_EMAIL = "support@revia.app";
+// Contact support (centralisé dans la config légale).
+const SUPPORT_EMAIL = LEGAL.contactEmail;
 
 // FAQ — éditable ici, enrichissez-la au fil du temps.
 const FAQ: { q: string; a: string }[] = [
