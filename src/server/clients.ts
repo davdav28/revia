@@ -229,3 +229,175 @@ export async function importClients(rows: ImportRow[]): Promise<ImportSummary> {
 
   return { created, skipped, duplicates, warnings };
 }
+
+/** Une ligne d'export d'agenda (Planity, Treatwell, Fresha…) : un rendez-vous. */
+export type ApptImportRow = {
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  date?: string;
+  service?: string;
+  amount?: string;
+};
+
+export type ApptImportSummary = {
+  clientsCreated: number;
+  appointmentsCreated: number;
+  skipped: number;
+  duplicates: number;
+  warnings: string[];
+};
+
+function normName(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim();
+}
+function nameKey(first: string, last: string | null): string {
+  return `${normName(first)}|${normName(last ?? "")}`;
+}
+
+/**
+ * Importe un historique de rendez-vous (export Planity/Treatwell/Fresha/caisse).
+ * Chaque ligne = une visite : on rattache (ou crée) la cliente puis on crée le
+ * RDV. Les statuts/dormance sont recalculés ensuite — c'est ce qui rend la
+ * détection fiable. Idempotent : un même RDV (cliente + date/heure) n'est pas
+ * recréé.
+ */
+export async function importAppointments(
+  rows: ApptImportRow[],
+): Promise<ApptImportSummary> {
+  const member = await requireMember();
+  const salonId = member.salonId;
+
+  const [clients, services, appts] = await Promise.all([
+    prisma.client.findMany({
+      where: { salonId },
+      select: { id: true, firstName: true, lastName: true, phone: true, email: true },
+    }),
+    prisma.service.findMany({
+      where: { salonId },
+      select: { id: true, name: true },
+    }),
+    prisma.appointment.findMany({
+      where: { salonId },
+      select: { clientId: true, startAt: true },
+    }),
+  ]);
+
+  const byPhone = new Map<string, string>();
+  const byEmail = new Map<string, string>();
+  const byName = new Map<string, string>();
+  for (const c of clients) {
+    if (c.phone) byPhone.set(c.phone, c.id);
+    if (c.email) byEmail.set(c.email.toLowerCase(), c.id);
+    byName.set(nameKey(c.firstName, c.lastName), c.id);
+  }
+  const serviceByName = new Map(services.map((s) => [normName(s.name), s.id]));
+  const apptKeys = new Set(
+    appts.map((a) => `${a.clientId}|${a.startAt.getTime()}`),
+  );
+
+  let clientsCreated = 0;
+  let appointmentsCreated = 0;
+  let skipped = 0;
+  let duplicates = 0;
+  const warnings: string[] = [];
+  const affected = new Set<string>();
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const line = i + 1;
+
+    let firstName = (r.firstName ?? "").trim();
+    let lastName = (r.lastName ?? "").trim();
+    const full = (r.fullName ?? "").trim();
+    if (!firstName && full) {
+      const parts = full.split(/\s+/);
+      firstName = parts.shift() ?? "";
+      lastName = lastName || parts.join(" ");
+    }
+
+    const phone = normalizePhone(r.phone);
+    const emailRaw = (r.email ?? "").trim();
+    const email =
+      emailRaw && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailRaw) ? emailRaw : null;
+
+    const date = parseFlexibleDate(r.date);
+    if (!date) {
+      skipped++;
+      if ((r.date ?? "").trim())
+        warnings.push(`Ligne ${line} : date illisible, ignorée.`);
+      else warnings.push(`Ligne ${line} : date manquante, ignorée.`);
+      continue;
+    }
+    if (!firstName && !phone && !email) {
+      skipped++;
+      warnings.push(`Ligne ${line} : aucune identité cliente, ignorée.`);
+      continue;
+    }
+
+    let clientId =
+      (phone && byPhone.get(phone)) ||
+      (email && byEmail.get(email.toLowerCase())) ||
+      (firstName && byName.get(nameKey(firstName, lastName))) ||
+      null;
+
+    if (!clientId) {
+      if (!firstName) {
+        skipped++;
+        warnings.push(
+          `Ligne ${line} : cliente sans nom (impossible à créer), ignorée.`,
+        );
+        continue;
+      }
+      const c = await prisma.client.create({
+        data: { salonId, firstName, lastName: lastName || null, phone, email },
+        select: { id: true },
+      });
+      clientId = c.id;
+      clientsCreated++;
+      if (phone) byPhone.set(phone, clientId);
+      if (email) byEmail.set(email.toLowerCase(), clientId);
+      byName.set(nameKey(firstName, lastName), clientId);
+    }
+
+    const key = `${clientId}|${date.getTime()}`;
+    if (apptKeys.has(key)) {
+      duplicates++;
+      affected.add(clientId);
+      continue;
+    }
+
+    const serviceId = r.service
+      ? (serviceByName.get(normName(r.service)) ?? null)
+      : null;
+    const amountCents = parseEurosToCents(r.amount);
+
+    await prisma.appointment.create({
+      data: {
+        salonId,
+        clientId,
+        startAt: date,
+        status: "completed",
+        source: "import",
+        amountCents,
+        serviceId,
+      },
+    });
+    apptKeys.add(key);
+    appointmentsCreated++;
+    affected.add(clientId);
+  }
+
+  await recomputeManyClientStats(salonId, [...affected]);
+  revalidatePath("/clientes");
+  revalidatePath("/agenda");
+  revalidatePath("/dashboard");
+
+  return { clientsCreated, appointmentsCreated, skipped, duplicates, warnings };
+}
