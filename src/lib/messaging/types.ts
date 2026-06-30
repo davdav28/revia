@@ -9,6 +9,8 @@ export type EmailParams = {
   html: string;
   senderEmail: string;
   senderName: string;
+  /** Adresse à laquelle vont les réponses (« Répondre ») — ex. l'email du salon. */
+  replyTo?: { email: string; name?: string };
 };
 
 /**

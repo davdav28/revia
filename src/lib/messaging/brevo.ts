@@ -66,6 +66,7 @@ export class BrevoProvider implements MessagingProvider {
           to: [{ email: p.to }],
           subject: p.subject,
           htmlContent: p.html,
+          ...(p.replyTo ? { replyTo: p.replyTo } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));

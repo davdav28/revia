@@ -49,9 +49,11 @@ export async function submitSuggestion(input: {
     await provider.sendEmail({
       to: LEGAL.contactEmail,
       subject: `[${ref}] ${label} — ${member.salon.name}`,
-      html: `<div><p><strong>${ref}</strong> · <strong>${label}</strong> de ${member.name ?? "—"} (${member.email}) · salon « ${member.salon.name} » :</p><blockquote>${parsed.data.message.replace(/\n/g, "<br>")}</blockquote></div>`,
+      html: `<div><p><strong>${ref}</strong> · <strong>${label}</strong> de ${member.name ?? "—"} (${member.email}) · salon « ${member.salon.name} » :</p><blockquote>${parsed.data.message.replace(/\n/g, "<br>")}</blockquote><p style="color:#6b5d67;font-size:12px">Répondez à cet email : votre réponse ira directement à ${member.email}.</p></div>`,
       senderEmail: process.env.BREVO_EMAIL_SENDER ?? LEGAL.contactEmail,
       senderName: BRAND.name,
+      // « Répondre » dans Gmail ira directement au salon.
+      replyTo: { email: member.email, name: member.name ?? member.salon.name },
     });
   } catch {
     // Silencieux : la suggestion est déjà enregistrée en base.
