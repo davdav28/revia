@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SuggestionForm } from "@/components/app/suggestion-form";
 import { formatDate } from "@/lib/dates";
+import { ticketRef } from "@/lib/ticket";
 import { LEGAL } from "@/config/legal";
 
 export const metadata: Metadata = { title: "Aide & suggestions" };
@@ -120,7 +121,10 @@ export default async function AidePage() {
                 <LifeBuoy className="text-lacquer-ink mt-0.5 size-4 shrink-0" />
                 <div className="flex-1">
                   <p className="text-ink text-sm">{s.message}</p>
-                  <div className="text-muted mt-1 flex items-center gap-2 text-xs">
+                  <div className="text-muted mt-1 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="tabular text-ink font-medium">
+                      {ticketRef(s.id)}
+                    </span>
                     <Badge tone="outline">
                       {CATEGORY_LABEL[s.category] ?? s.category}
                     </Badge>

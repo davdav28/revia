@@ -8,10 +8,11 @@ import {
   type SuggestionCategory,
 } from "@/lib/validations/suggestion";
 import { getMessagingProvider } from "@/lib/messaging";
+import { ticketRef } from "@/lib/ticket";
 import { LEGAL } from "@/config/legal";
 import { BRAND } from "@/config/brand";
 
-export type SuggestionResult = { ok: true } | { error: string };
+export type SuggestionResult = { ok: true; ref: string } | { error: string };
 
 const CATEGORY_LABEL: Record<string, string> = {
   question: "Question",
@@ -29,7 +30,7 @@ export async function submitSuggestion(input: {
     return { error: parsed.error.issues[0]?.message ?? "Message invalide." };
   }
 
-  await prisma.suggestion.create({
+  const created = await prisma.suggestion.create({
     data: {
       salonId: member.salonId,
       category: parsed.data.category,
@@ -37,7 +38,9 @@ export async function submitSuggestion(input: {
       authorName: member.name,
       authorEmail: member.email,
     },
+    select: { id: true },
   });
+  const ref = ticketRef(created.id);
 
   // Notification à l'équipe Revia (best-effort : n'empêche jamais l'envoi).
   try {
@@ -45,8 +48,8 @@ export async function submitSuggestion(input: {
     const label = CATEGORY_LABEL[parsed.data.category] ?? parsed.data.category;
     await provider.sendEmail({
       to: LEGAL.contactEmail,
-      subject: `[${label}] ${member.salon.name} — via ${BRAND.name}`,
-      html: `<div><p><strong>${label}</strong> de ${member.name ?? "—"} (${member.email}) · salon « ${member.salon.name} » :</p><blockquote>${parsed.data.message.replace(/\n/g, "<br>")}</blockquote></div>`,
+      subject: `[${ref}] ${label} — ${member.salon.name}`,
+      html: `<div><p><strong>${ref}</strong> · <strong>${label}</strong> de ${member.name ?? "—"} (${member.email}) · salon « ${member.salon.name} » :</p><blockquote>${parsed.data.message.replace(/\n/g, "<br>")}</blockquote></div>`,
       senderEmail: process.env.BREVO_EMAIL_SENDER ?? LEGAL.contactEmail,
       senderName: BRAND.name,
     });
@@ -55,5 +58,5 @@ export async function submitSuggestion(input: {
   }
 
   revalidatePath("/aide");
-  return { ok: true };
+  return { ok: true, ref };
 }

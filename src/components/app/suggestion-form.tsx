@@ -34,7 +34,7 @@ export function SuggestionForm() {
       }
       setMessage("");
       setCategory("idea");
-      toast.success("Merci ! Votre message nous a bien été transmis.");
+      toast.success(`Merci ! Message transmis · réf. ${res.ref}`);
       router.refresh();
     });
   }
