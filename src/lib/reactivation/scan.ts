@@ -16,7 +16,7 @@ import { countSegments } from "@/lib/sms-segments";
 import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
 import { getTrialStatus } from "@/lib/trial";
 import { reportOverageSegments } from "@/lib/billing-usage";
-import { SUBSCRIPTION } from "@/config/brand";
+import { SUBSCRIPTION, withStopNotice } from "@/config/brand";
 
 const DAY = 86_400_000;
 const MAX_PER_CAMPAIGN = 200;
@@ -324,7 +324,12 @@ export async function runScanForSalon(
         offre: "",
         jour: "",
       };
-      const body = renderTemplate(template.body, vars);
+      // Pour les SMS : on ajoute la mention de désabonnement (STOP), exigée
+      // pour la prospection en France. Les emails ont déjà un lien Se désabonner.
+      const body =
+        campaign.channel === "sms"
+          ? withStopNotice(renderTemplate(template.body, vars))
+          : renderTemplate(template.body, vars);
       const subject = template.subject
         ? renderTemplate(template.subject, vars)
         : null;

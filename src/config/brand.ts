@@ -27,6 +27,19 @@ export const BRAND = {
 export type Brand = typeof BRAND;
 
 /**
+ * Mention de désabonnement ajoutée à la fin des SMS de relance (obligatoire pour
+ * la prospection en France). Le code court exact dépend de votre agrégateur SMS
+ * — confirmez-le auprès de Brevo. Mettre une chaîne vide pour la désactiver
+ * (par ex. si l'opérateur l'ajoute déjà automatiquement).
+ */
+export const SMS_STOP_NOTICE = "STOP au 36180";
+
+/** Ajoute la mention STOP à un corps de SMS (no-op si la mention est vide). */
+export function withStopNotice(body: string): string {
+  return SMS_STOP_NOTICE ? `${body} ${SMS_STOP_NOTICE}` : body;
+}
+
+/**
  * Drapeaux de fonctionnalités. La réservation en ligne publique par salon est
  * prévue mais désactivée pour l'instant (« à activer plus tard »).
  */

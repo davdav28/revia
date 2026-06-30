@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { countSegments } from "@/lib/sms-segments";
+import { SMS_STOP_NOTICE, withStopNotice } from "@/config/brand";
 import { updateTemplate } from "@/server/reactivation";
 
 export type EditableTemplate = {
@@ -98,13 +99,21 @@ function Form({
             <span
               className={cn(
                 "tabular shrink-0 text-xs font-medium",
-                countSegments(body) > 1 ? "text-status-at-risk" : "text-muted",
+                countSegments(withStopNotice(body)) > 1
+                  ? "text-status-at-risk"
+                  : "text-muted",
               )}
             >
-              = {countSegments(body)} SMS
+              = {countSegments(withStopNotice(body))} SMS
             </span>
           ) : null}
         </div>
+        {template.channel === "sms" && SMS_STOP_NOTICE ? (
+          <p className="text-muted text-xs">
+            « {SMS_STOP_NOTICE} » est ajouté automatiquement à la fin (obligation
+            légale) et compté dans les segments.
+          </p>
+        ) : null}
       </div>
       <div className="flex items-center gap-2 pt-1">
         <Button onClick={submit} disabled={isPending}>

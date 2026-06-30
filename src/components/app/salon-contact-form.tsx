@@ -10,13 +10,16 @@ import { setSalonContact } from "@/server/salon";
 
 /** Saisie de l'adresse + téléphone du salon (affichés sur la page de réservation). */
 export function SalonContactForm({
+  senderName,
   address,
   phone,
 }: {
+  senderName: string;
   address: string;
   phone: string;
 }) {
   const router = useRouter();
+  const [sender, setSender] = useState(senderName);
   const [a, setA] = useState(address);
   const [p, setP] = useState(phone);
   const [isPending, startTransition] = useTransition();
@@ -24,18 +27,33 @@ export function SalonContactForm({
   function save(e: React.FormEvent) {
     e.preventDefault();
     startTransition(async () => {
-      const res = await setSalonContact({ address: a, phone: p });
+      const res = await setSalonContact({ senderName: sender, address: a, phone: p });
       if ("error" in res) {
         toast.error(res.error);
         return;
       }
-      toast.success("Coordonnées enregistrées.");
+      toast.success("Enregistré.");
       router.refresh();
     });
   }
 
   return (
     <form onSubmit={save} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="salon-sender">Nom expéditeur SMS</Label>
+        <Input
+          id="salon-sender"
+          value={sender}
+          onChange={(e) => setSender(e.target.value)}
+          placeholder="Revia"
+          maxLength={11}
+        />
+        <p className="text-muted text-xs">
+          C'est le nom affiché à la place du numéro sur les SMS. Max 11
+          caractères, lettres/chiffres, sans accent. À déclarer auprès de votre
+          opérateur SMS.
+        </p>
+      </div>
       <div className="space-y-1.5">
         <Label htmlFor="salon-address">Adresse</Label>
         <Input

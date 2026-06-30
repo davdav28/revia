@@ -140,11 +140,11 @@ export default async function ReglagesPage() {
         <CardContent className="space-y-5 pt-0">
           <div>
             <Row label="Nom du salon" value={member.salon.name} />
-            <Row label="Nom expéditeur SMS" value={member.salon.senderName} />
             <Row label="Fuseau horaire" value={member.salon.timezone} />
           </div>
           <div className="border-line border-t pt-5">
             <SalonContactForm
+              senderName={member.salon.senderName}
               address={member.salon.address ?? ""}
               phone={member.salon.phone ?? ""}
             />

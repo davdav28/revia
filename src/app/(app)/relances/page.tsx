@@ -33,6 +33,7 @@ import { TemplateEditDialog } from "@/components/reactivation/template-edit-dial
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { countSegments } from "@/lib/sms-segments";
+import { withStopNotice } from "@/config/brand";
 
 export const metadata: Metadata = { title: "Relances" };
 
@@ -188,7 +189,7 @@ export default async function RelancesPage() {
                   <CardDescription>
                     <span className="uppercase">{t.channel}</span>
                     {t.channel === "sms" ? (
-                      <span> · = {countSegments(t.body)} SMS</span>
+                      <span> · = {countSegments(withStopNotice(t.body))} SMS</span>
                     ) : null}
                   </CardDescription>
                 </div>

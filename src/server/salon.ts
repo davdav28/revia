@@ -16,12 +16,22 @@ export async function setBookingEnabled(enabled: boolean): Promise<void> {
 }
 
 const contactSchema = z.object({
+  // Expéditeur SMS : contrainte opérateurs = ≤ 11 caractères alphanumériques,
+  // au moins une lettre (un expéditeur purement numérique est refusé).
+  senderName: z
+    .string()
+    .trim()
+    .min(2, "Nom expéditeur trop court.")
+    .max(11, "11 caractères maximum.")
+    .regex(/^[A-Za-z0-9 ]+$/, "Lettres et chiffres uniquement.")
+    .refine((v) => /[A-Za-z]/.test(v), "Doit contenir au moins une lettre."),
   address: z.string().trim().max(200).optional().default(""),
   phone: z.string().trim().max(30).optional().default(""),
 });
 
-/** Coordonnées du salon (affichées aux clientes sur la page de réservation). */
+/** Coordonnées du salon (affichées aux clientes) + nom expéditeur SMS. */
 export async function setSalonContact(input: {
+  senderName: string;
   address: string;
   phone: string;
 }): Promise<{ ok: true } | { error: string }> {
@@ -33,6 +43,7 @@ export async function setSalonContact(input: {
   await prisma.salon.update({
     where: { id: member.salonId },
     data: {
+      senderName: parsed.data.senderName,
       address: parsed.data.address || null,
       phone: parsed.data.phone || null,
     },
