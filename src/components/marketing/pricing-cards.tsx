@@ -190,7 +190,7 @@ export function PricingCards() {
                   plan.highlight ? "text-[var(--nude)]" : "text-muted",
                 )}
               >
-                {SUBSCRIPTION.trial.days} jours d'essai gratuit · sans carte
+                {SUBSCRIPTION.trial.days} jours d'essai gratuit
               </p>
             </div>
           );
