@@ -6,6 +6,7 @@ import {
   CreditCard,
   Download,
   Clock,
+  Users,
 } from "lucide-react";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -36,9 +37,10 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 
 export default async function ReglagesPage() {
   const member = await requireMember();
-  const servicesCount = await prisma.service.count({
-    where: { salonId: member.salonId },
-  });
+  const [servicesCount, usersCount] = await Promise.all([
+    prisma.service.count({ where: { salonId: member.salonId } }),
+    prisma.user.count({ where: { salonId: member.salonId } }),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -77,6 +79,24 @@ export default async function ReglagesPage() {
                 {SUBSCRIPTION_STATUS_LABEL[member.salon.subscriptionStatus] ??
                   member.salon.subscriptionStatus}{" "}
                 · formules et facturation
+              </CardDescription>
+            </div>
+            <ChevronRight className="text-muted size-5" />
+          </CardContent>
+        </Card>
+      </Link>
+
+      <Link href="/reglages/equipe" className="block">
+        <Card className="hover:bg-nude-soft/40 transition-colors">
+          <CardContent className="flex items-center gap-4 py-5">
+            <div className="bg-nude-soft text-lacquer-ink flex size-10 items-center justify-center rounded-md">
+              <Users className="size-5" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-base">Équipe</CardTitle>
+              <CardDescription>
+                {usersCount} membre{usersCount > 1 ? "s" : ""} · inviter des
+                coéquipiers
               </CardDescription>
             </div>
             <ChevronRight className="text-muted size-5" />

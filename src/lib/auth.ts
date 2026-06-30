@@ -37,3 +37,13 @@ export async function requireMember(): Promise<Member> {
   if (!member) redirect("/login");
   return member;
 }
+
+/**
+ * Comme `requireMember`, mais réservé au propriétaire du salon (gestion de
+ * l'équipe, facturation). Un membre « staff » est renvoyé au tableau de bord.
+ */
+export async function requireOwner(): Promise<Member> {
+  const member = await requireMember();
+  if (member.role !== "owner") redirect("/dashboard");
+  return member;
+}

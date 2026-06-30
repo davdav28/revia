@@ -98,6 +98,7 @@ model Salon {
   updatedAt DateTime @updatedAt
 
   users        User[]
+  invitations  Invitation[]
   clients      Client[]
   services     Service[]
   appointments Appointment[]
@@ -106,6 +107,27 @@ model Salon {
   messages     Message[]
   recoveries   Recovery[]
   suggestions  Suggestion[]
+}
+
+/// Invitation d'un coéquipier à rejoindre un salon. Acceptée via /rejoindre/<token>.
+model Invitation {
+  id        String    @id @default(cuid())
+  email     String
+  role      UserRole  @default(staff)
+  token     String    @unique
+  status    String    @default("pending") // pending | accepted | revoked
+  invitedByName String?
+  expiresAt DateTime
+  acceptedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  salon   Salon  @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId String
+
+  // Une seule invitation par email et par salon (on remplace si on ré-invite).
+  @@unique([salonId, email])
+  @@index([salonId])
 }
 
 /// Membre d'un salon. Relié à l'utilisateur Supabase Auth via authId.
