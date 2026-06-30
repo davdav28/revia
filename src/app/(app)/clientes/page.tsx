@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Users, Upload, Plus } from "lucide-react";
+import { Users, Upload, Plus, Download } from "lucide-react";
 import type { Prisma } from "@prisma/client";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -19,7 +19,12 @@ import {
 } from "@/components/ui/table";
 import { formatRelative } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
-import type { ClientStatus } from "@/lib/client-status";
+import {
+  buildClientWhere,
+  hasActiveFilters,
+  toFilterQuery,
+  type ClientFilterParams,
+} from "@/lib/client-filters";
 
 export const metadata: Metadata = { title: "Clientes" };
 
@@ -33,31 +38,28 @@ const ORDER_BY: Record<string, Prisma.ClientOrderByWithRelationInput[]> = {
 export default async function ClientesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; sort?: string }>;
+  searchParams: Promise<ClientFilterParams & { sort?: string }>;
 }) {
   const member = await requireMember();
-  const { q, status, sort } = await searchParams;
+  const sp = await searchParams;
+  const { sort } = sp;
 
-  const where: Prisma.ClientWhereInput = { salonId: member.salonId };
-  if (status) where.status = status as ClientStatus;
-  if (q && q.trim()) {
-    const term = q.trim();
-    where.OR = [
-      { firstName: { contains: term, mode: "insensitive" } },
-      { lastName: { contains: term, mode: "insensitive" } },
-      { phone: { contains: term } },
-      { email: { contains: term, mode: "insensitive" } },
-    ];
-  }
+  const where = buildClientWhere(member.salonId, sp);
+  const filtered = hasActiveFilters(sp);
 
-  const [clients, totalCount] = await Promise.all([
+  const [clients, filteredCount, totalCount] = await Promise.all([
     prisma.client.findMany({
       where,
       orderBy: ORDER_BY[sort ?? "recent"] ?? ORDER_BY.recent,
       take: 500,
     }),
+    filtered
+      ? prisma.client.count({ where })
+      : prisma.client.count({ where: { salonId: member.salonId } }),
     prisma.client.count({ where: { salonId: member.salonId } }),
   ]);
+
+  const exportQuery = toFilterQuery(sp);
 
   const actions = (
     <>
@@ -113,6 +115,35 @@ export default async function ClientesPage({
       ) : (
         <>
           <ClientsToolbar />
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-muted text-sm">
+              {filtered ? (
+                <>
+                  <span className="text-ink font-semibold">{filteredCount}</span>{" "}
+                  cliente{filteredCount > 1 ? "s" : ""} dans ce segment{" "}
+                  <span className="text-muted">
+                    (sur {totalCount})
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-ink font-semibold">{totalCount}</span>{" "}
+                  cliente{totalCount > 1 ? "s" : ""}
+                </>
+              )}
+            </p>
+            {filteredCount > 0 ? (
+              <Button variant="secondary" size="sm" asChild>
+                <a
+                  href={`/api/clients/segment/export${exportQuery ? `?${exportQuery}` : ""}`}
+                >
+                  <Download className="size-4" />
+                  Exporter ce segment (CSV)
+                </a>
+              </Button>
+            ) : null}
+          </div>
 
           {clients.length === 0 ? (
             <div className="border-line bg-surface/60 text-muted rounded-lg border border-dashed px-6 py-12 text-center text-sm">
