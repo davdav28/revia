@@ -100,6 +100,18 @@ export function SignupForm() {
         {isPending ? "Création…" : "Créer mon salon"}
       </Button>
 
+      <p className="text-muted text-center text-xs">
+        En créant votre salon, vous acceptez les{" "}
+        <Link href="/cgu" className="hover:text-ink underline">
+          conditions d'utilisation
+        </Link>{" "}
+        et la{" "}
+        <Link href="/confidentialite" className="hover:text-ink underline">
+          politique de confidentialité
+        </Link>
+        .
+      </p>
+
       <p className="text-muted text-center text-sm">
         Déjà un compte ?{" "}
         <Link

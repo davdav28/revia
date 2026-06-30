@@ -189,13 +189,21 @@ export default async function ReglagesPage() {
         </CardContent>
       </Card>
 
-      <p className="text-muted text-center text-xs">
-        <Link href="/confidentialite" className="hover:text-ink">
-          Politique de confidentialité
-        </Link>{" "}
-        ·{" "}
+      <p className="text-muted flex flex-wrap justify-center gap-x-3 gap-y-1 text-center text-xs">
+        <Link href="/mentions-legales" className="hover:text-ink">
+          Mentions légales
+        </Link>
+        <span>·</span>
         <Link href="/cgu" className="hover:text-ink">
-          Conditions d'utilisation
+          CGU
+        </Link>
+        <span>·</span>
+        <Link href="/confidentialite" className="hover:text-ink">
+          Confidentialité
+        </Link>
+        <span>·</span>
+        <Link href="/sous-traitance" className="hover:text-ink">
+          Sous-traitance (RGPD)
         </Link>
       </p>
     </div>

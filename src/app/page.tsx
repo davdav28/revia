@@ -191,10 +191,19 @@ export default function Home() {
               Le cycle de l'ongle est une boucle. On la referme avec vous.
             </p>
           </div>
-          <div className="text-muted flex items-center gap-6 text-sm">
+          <div className="text-muted flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <span>Conforme RGPD</span>
-            <Link href="/ds" className="hover:text-ink">
-              Design system
+            <Link href="/mentions-legales" className="hover:text-ink">
+              Mentions légales
+            </Link>
+            <Link href="/cgu" className="hover:text-ink">
+              CGU
+            </Link>
+            <Link href="/confidentialite" className="hover:text-ink">
+              Confidentialité
+            </Link>
+            <Link href="/sous-traitance" className="hover:text-ink">
+              Sous-traitance
             </Link>
           </div>
         </div>

@@ -94,12 +94,18 @@ export default function TarifsPage() {
             selon votre formule (0,16 € · 0,13 € · 0,10 €), avec un plafond que
             vous fixez.
           </p>
-          <div className="text-muted flex items-center gap-6 text-sm">
-            <Link href="/confidentialite" className="hover:text-ink">
-              Confidentialité
+          <div className="text-muted flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm">
+            <Link href="/mentions-legales" className="hover:text-ink">
+              Mentions légales
             </Link>
             <Link href="/cgu" className="hover:text-ink">
               CGU
+            </Link>
+            <Link href="/confidentialite" className="hover:text-ink">
+              Confidentialité
+            </Link>
+            <Link href="/sous-traitance" className="hover:text-ink">
+              Sous-traitance
             </Link>
           </div>
         </div>
