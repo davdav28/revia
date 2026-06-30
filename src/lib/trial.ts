@@ -4,7 +4,7 @@ const DAY = 86_400_000;
 
 export type TrialStatus = {
   isTrial: boolean;
-  /** Jours restants avant la fin des 30 jours (0 si dépassé). */
+  /** Jours restants avant la fin de l'essai (0 si dépassé). */
   daysLeft: number;
   recoveredCents: number;
   targetCents: number;
@@ -16,9 +16,9 @@ export type TrialStatus = {
 };
 
 /**
- * État de l'essai gratuit : il prend fin au premier des deux seuils —
- * 30 jours, ou 300 € de chiffre d'affaires récupéré. Inclut 150 segments
- * offerts. `recoveredCentsSinceStart` = CA récupéré depuis le début de l'essai.
+ * État de l'essai gratuit : il prend fin au premier des deux seuils (durée et
+ * objectif de CA récupéré, définis dans `SUBSCRIPTION.trial`), avec des
+ * segments offerts. `recoveredCentsSinceStart` = CA récupéré depuis le début.
  */
 export function getTrialStatus(
   salon: { subscriptionStatus: string; createdAt: Date },

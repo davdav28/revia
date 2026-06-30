@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import type { TrialStatus } from "@/lib/trial";
 
 /**
- * Bandeau d'essai gratuit : progression vers les deux seuils (30 jours OU
- * 300 € récupérés) + segments offerts restants. Invite à choisir une formule.
+ * Bandeau d'essai gratuit : progression vers les deux seuils (durée OU
+ * objectif de CA récupéré) + segments offerts restants. Invite à choisir.
  * Affiché tant que le salon est en essai.
  */
 export function TrialBanner({

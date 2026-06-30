@@ -191,10 +191,12 @@ export function PricingCards() {
 
       <p className="text-muted mx-auto max-w-xl text-center text-sm">
         <span className="text-ink font-semibold">
-          Gratuit jusqu'à 100 € de chiffre d'affaires récupéré
+          Gratuit jusqu'à{" "}
+          {formatCents(SUBSCRIPTION.trial.recoveredEurosTarget * 100)} de chiffre
+          d'affaires récupéré
         </span>
-        , ou 30 jours d'essai — le premier des deux. Vous ne payez Revia que
-        quand il vous a déjà rapporté.
+        , ou {SUBSCRIPTION.trial.days} jours d'essai — le premier des deux. Vous
+        ne payez Revia que quand il vous a déjà rapporté.
       </p>
     </div>
   );

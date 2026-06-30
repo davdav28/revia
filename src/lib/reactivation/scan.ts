@@ -194,7 +194,7 @@ export async function runScanForSalon(
     summary.recoveredAmountCents += amount;
   }
 
-  // Essai terminé (30 jours OU 300 € récupérés) → on bloque les nouveaux envois.
+  // Essai terminé (durée OU objectif de CA atteint) → on bloque les envois.
   if (summary.subscriptionActive && salon.subscriptionStatus === "trial") {
     const recAgg = await prisma.recovery.aggregate({
       where: { salonId, recoveredAt: { gte: salon.createdAt } },

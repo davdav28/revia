@@ -87,7 +87,7 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  // Bandeau facturation : essai (progression 30 j / 300 €) ou quota.
+  // Bandeau facturation : essai (progression durée / objectif CA) ou quota.
   const quotaStatus = getQuotaStatus(member.salon);
   let trialRecoveredCents = 0;
   if (member.salon.subscriptionStatus === "trial") {

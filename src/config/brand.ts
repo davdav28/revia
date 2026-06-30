@@ -110,7 +110,7 @@ export const SUBSCRIPTION = {
   rechargePack: { segments: 500, priceCents: 4500 },
 
   // Essai.
-  trial: { days: 30, recoveredEurosTarget: 300, freeSegments: 150 },
+  trial: { days: 15, recoveredEurosTarget: 100, freeSegments: 150 },
 } as const;
 
 export type Plan = (typeof SUBSCRIPTION.plans)[number];
