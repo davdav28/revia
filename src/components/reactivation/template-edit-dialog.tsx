@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { countSegments } from "@/lib/sms-segments";
 import { updateTemplate } from "@/server/reactivation";
 
 export type EditableTemplate = {
@@ -87,10 +89,22 @@ function Form({
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />
-        <p className="text-muted text-xs">
-          Variables : {"{{prenom}}"}, {"{{salon}}"}, {"{{offre}}"}, {"{{lien}}"}
-          .
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-muted text-xs">
+            Variables : {"{{prenom}}"}, {"{{salon}}"}, {"{{offre}}"},{" "}
+            {"{{lien}}"}.
+          </p>
+          {template.channel === "sms" ? (
+            <span
+              className={cn(
+                "tabular shrink-0 text-xs font-medium",
+                countSegments(body) > 1 ? "text-status-at-risk" : "text-muted",
+              )}
+            >
+              = {countSegments(body)} SMS
+            </span>
+          ) : null}
+        </div>
       </div>
       <div className="flex items-center gap-2 pt-1">
         <Button onClick={submit} disabled={isPending}>

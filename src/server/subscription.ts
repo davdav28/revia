@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
-import { SUBSCRIPTION } from "@/config/brand";
+import { getPlan, type BillingPeriod } from "@/config/brand";
 
 const DAY = 86_400_000;
 
@@ -14,23 +14,33 @@ function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
-/** Démarre l'abonnement : Checkout Stripe si configuré, sinon activation démo. */
-export async function startCheckout(planId: string): Promise<CheckoutResult> {
+/**
+ * Démarre l'abonnement à un plan + une période (mensuel/annuel) :
+ * Checkout Stripe si configuré, sinon activation démo. Réinitialise le quota.
+ */
+export async function startCheckout(
+  planId: string,
+  period: BillingPeriod = "monthly",
+): Promise<CheckoutResult> {
   const member = await requireMember();
-  const plan = SUBSCRIPTION.plans.find((p) => p.id === planId);
+  const plan = getPlan(planId);
   if (!plan) return { error: "Plan inconnu." };
 
   const stripe = getStripe();
 
   // --- Mode démo (sans clé Stripe) : on active directement. ---
   if (!stripe) {
-    const periodDays = plan.id === "annual" ? 365 : 30;
+    const periodDays = period === "annual" ? 365 : 30;
     await prisma.salon.update({
       where: { id: member.salonId },
       data: {
         subscriptionStatus: "active",
         plan: plan.id,
+        billingPeriod: period,
         currentPeriodEnd: new Date(Date.now() + periodDays * DAY),
+        // Quota neuf pour la nouvelle période.
+        smsUsedThisPeriod: 0,
+        quotaPeriodStart: new Date(),
       },
     });
     revalidatePath("/reglages/abonnement");
@@ -39,7 +49,10 @@ export async function startCheckout(planId: string): Promise<CheckoutResult> {
   }
 
   // --- Stripe réel ---
-  const priceId = process.env[plan.priceEnvKey];
+  const priceId =
+    process.env[
+      period === "annual" ? plan.annualPriceEnvKey : plan.monthlyPriceEnvKey
+    ];
   if (!priceId) return { error: "Prix Stripe non configuré." };
 
   let customerId = member.salon.stripeCustomerId;
@@ -62,8 +75,10 @@ export async function startCheckout(planId: string): Promise<CheckoutResult> {
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${appUrl()}/reglages/abonnement?success=1`,
     cancel_url: `${appUrl()}/reglages/abonnement?canceled=1`,
-    metadata: { salonId: member.salonId, plan: plan.id },
-    subscription_data: { metadata: { salonId: member.salonId } },
+    metadata: { salonId: member.salonId, plan: plan.id, period },
+    subscription_data: {
+      metadata: { salonId: member.salonId, plan: plan.id, period },
+    },
   });
 
   if (!session.url) return { error: "Impossible de démarrer le paiement." };

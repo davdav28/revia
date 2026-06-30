@@ -29,6 +29,7 @@ import { CampaignToggle } from "@/components/reactivation/campaign-toggle";
 import { TemplateEditDialog } from "@/components/reactivation/template-edit-dialog";
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
+import { countSegments } from "@/lib/sms-segments";
 
 export const metadata: Metadata = { title: "Relances" };
 
@@ -168,8 +169,11 @@ export default async function RelancesPage() {
               <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
                 <div>
                   <CardTitle className="text-base">{t.name}</CardTitle>
-                  <CardDescription className="uppercase">
-                    {t.channel}
+                  <CardDescription>
+                    <span className="uppercase">{t.channel}</span>
+                    {t.channel === "sms" ? (
+                      <span> · = {countSegments(t.body)} SMS</span>
+                    ) : null}
                   </CardDescription>
                 </div>
                 <TemplateEditDialog

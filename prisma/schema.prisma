@@ -84,8 +84,15 @@ model Salon {
   stripeCustomerId     String?
   stripeSubscriptionId String?
   subscriptionStatus   String    @default("trial") // trial | active | past_due | canceled
-  plan                 String? // monthly | annual
+  plan                 String? // essentiel | pro | multi
+  billingPeriod        String? // monthly | annual
   currentPeriodEnd     DateTime?
+
+  // Quota SMS (en segments) — décompté à chaque envoi, reset au cycle Stripe.
+  smsUsedThisPeriod Int       @default(0)
+  quotaPeriodStart  DateTime?
+  rechargeSegments  Int       @default(0) // packs prépayés cumulés, sans expiration
+  overageCapCents   Int       @default(3000) // plafond de dépassement mensuel (défaut 30 €)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -250,6 +257,7 @@ model Message {
   subject    String?
   body       String
   status     MessageStatus @default(queued)
+  segments   Int           @default(1) // nb de segments SMS (1 pour un email)
   costCents  Int?
   providerId String?
   error      String?

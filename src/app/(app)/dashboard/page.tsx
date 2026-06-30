@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Upload, Users, TrendingUp } from "lucide-react";
-import { BRAND, SUBSCRIPTION } from "@/config/brand";
+import { BRAND, getPlan, HIGHLIGHTED_PLAN_ID } from "@/config/brand";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app/page-header";
@@ -116,7 +116,11 @@ export default async function DashboardPage() {
     messagedCount > 0
       ? Math.round((reactivations30 / messagedCount) * 100)
       : null;
-  const roi = recoveredMonthCents / SUBSCRIPTION.monthlyCents;
+  // Référence de prix pour le ROI : le plan du salon, sinon le plan mis en avant.
+  const refMonthlyCents =
+    getPlan(member.salon.plan)?.monthlyCents ??
+    getPlan(HIGHLIGHTED_PLAN_ID)!.monthlyCents;
+  const roi = recoveredMonthCents / refMonthlyCents;
 
   // Rétention durable (réactivations matures de +90 j encore actives ensuite).
   // Batché : 2 requêtes au lieu de 1 + N.
@@ -213,7 +217,7 @@ export default async function DashboardPage() {
         </div>
         <p className="text-muted mt-4 max-w-2xl">
           {recoveredMonthCents > 0
-            ? `Ce mois-ci, ${BRAND.name} vous a rapporté ${formatCents(recoveredMonthCents)} pour ${formatCents(SUBSCRIPTION.monthlyCents)} d'abonnement — soit ${roi.toFixed(1)}× votre investissement.`
+            ? `Ce mois-ci, ${BRAND.name} vous a rapporté ${formatCents(recoveredMonthCents)} pour ${formatCents(refMonthlyCents)} d'abonnement — soit ${roi.toFixed(1)}× votre investissement.`
             : `Activez vos relances : dès qu'une cliente relancée revient, son chiffre d'affaires s'affiche ici.`}
         </p>
       </div>

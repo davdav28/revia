@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SubscribeButtons } from "@/components/app/subscribe-buttons";
 import { formatDate } from "@/lib/dates";
+import { getPlan } from "@/config/brand";
 
 export const metadata: Metadata = { title: "Abonnement" };
 
@@ -19,9 +20,11 @@ export default async function AbonnementPage() {
   const salon = member.salon;
   const active = isSubscriptionActive(salon.subscriptionStatus);
   const stripeOn = isStripeConfigured();
+  const plan = getPlan(salon.plan);
+  const quota = (plan?.smsQuota ?? 0) + salon.rechargeSegments;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <Link
         href="/reglages"
         className="text-muted hover:text-ink inline-flex items-center gap-1.5 text-sm"
@@ -49,6 +52,7 @@ export default async function AbonnementPage() {
             <p className="font-display text-ink mt-0.5 font-semibold">
               {SUBSCRIPTION_STATUS_LABEL[salon.subscriptionStatus] ??
                 salon.subscriptionStatus}
+              {plan ? ` · ${plan.label}` : ""}
             </p>
           </div>
           <Badge
@@ -57,6 +61,14 @@ export default async function AbonnementPage() {
             {active ? "Relances actives" : "Relances en pause"}
           </Badge>
         </div>
+        {plan ? (
+          <p className="tabular text-muted mt-2 text-sm">
+            SMS ce mois : {salon.smsUsedThisPeriod} / {quota} segments
+            {salon.rechargeSegments > 0
+              ? ` (dont ${salon.rechargeSegments} de recharge)`
+              : ""}
+          </p>
+        ) : null}
         {salon.currentPeriodEnd ? (
           <p className="text-muted mt-2 text-sm">
             {salon.subscriptionStatus === "canceled"
