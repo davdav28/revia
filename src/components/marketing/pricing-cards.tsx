@@ -184,6 +184,14 @@ export function PricingCards() {
                   <Link href={cta.href}>{cta.label}</Link>
                 )}
               </Button>
+              <p
+                className={cn(
+                  "mt-2 text-center text-xs font-medium",
+                  plan.highlight ? "text-[var(--nude)]" : "text-muted",
+                )}
+              >
+                {SUBSCRIPTION.trial.days} jours d'essai gratuit · sans carte
+              </p>
             </div>
           );
         })}
