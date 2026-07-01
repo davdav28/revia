@@ -8,7 +8,8 @@ import { DEFAULT_SERVICES } from "@/lib/default-services";
  *
  * Les modèles reposent sur une base neutre (`DEFAULT_TEMPLATES`). Un métier ne
  * surcharge que les modèles où son vocabulaire change vraiment (`overrides`) ;
- * les autres restent neutres.
+ * les autres restent neutres. Ton : chaleureux mais vendeur (urgence douce,
+ * rareté, CTA en question).
  */
 export type MetierId =
   | "onglerie"
@@ -41,21 +42,25 @@ export const METIERS: Metier[] = [
     services: DEFAULT_SERVICES,
     overrides: {
       cycle_sms_1:
-        "{{prenom}}, vos ongles arrivent en fin de tenue ✨ C'est le moment idéal pour un remplissage. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+        "{{prenom}}, vos ongles ont dû bien vivre depuis la dernière fois 💅 Je vous bloque un créneau remplissage cette semaine ? {{lien}} — {{salon}}",
       cycle_sms_2:
-        "{{prenom}}, déjà {{semaines}} semaines depuis votre pose 💅 Vos ongles réclament sûrement un petit raccord. On vous trouve un moment ? {{lien}}",
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre pose ✨ Un petit raccord et c'est reparti pour de belles mains. Je vous garde un créneau cette semaine ? {{lien}}",
+      soft_sms_1:
+        "{{prenom}}, vos ongles réclament un peu d'attention 💅 J'ai de belles dispos cette semaine chez {{salon}} — je vous en réserve une ? {{lien}}",
       soft_sms_2:
-        "{{prenom}}, vos ongles nous manquent 😊 Si l'envie de repasser vous prend, on vous garde une place avec plaisir : {{lien}} — {{salon}}",
+        "{{prenom}}, envie de retrouver des ongles impeccables ? 😊 Il me reste quelques créneaux cette semaine chez {{salon}}. Je vous en garde un ? {{lien}}",
       firstvisit_sms_1:
-        "{{prenom}}, j'espère que votre première pose chez {{salon}} vous a plu 💕 Pour garder de belles mains, c'est le bon moment pour le prochain rdv. {{lien}}",
+        "{{prenom}}, j'espère que votre première pose vous a plu 💕 Pour garder de belles mains, le remplissage se joue maintenant — je vous bloque le prochain rdv ? {{lien}}",
       birthday_sms_2:
-        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous des ongles parfaits pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous des ongles parfaits pour l'occasion — je vous garde le meilleur créneau ? {{lien}} — {{salon}}",
       novelty_sms_1:
-        "{{prenom}}, on vient de rentrer les nouvelles teintes de la saison chez {{salon}} 💅 Envie d'en tester une ? Votre créneau vous attend : {{lien}}",
+        "{{prenom}}, les nouvelles teintes de la saison viennent d'arriver chez {{salon}} 💅 Envie d'être la première à les porter ? Je vous réserve un créneau : {{lien}}",
       seasonal_sms_1:
-        "{{prenom}}, les fêtes approchent 🎄 Réservez vos ongles de fête chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+        "{{prenom}}, les fêtes approchent 🎄 Les créneaux « ongles de fête » partent vite chez {{salon}} — je vous garde le vôtre ? {{lien}}",
       seasonal_sms_2:
-        "{{prenom}}, bientôt l'été ☀️ On vous prépare des ongles parfaits pour les sandales ? Votre créneau : {{lien}} — {{salon}}",
+        "{{prenom}}, bientôt l'été ☀️ Des ongles parfaits pour les sandales, ça vous tente ? Je vous réserve un créneau avant la ruée : {{lien}} — {{salon}}",
+      winback_sms_1:
+        "{{prenom}}, ça fait trop longtemps sans vos mains chez {{salon}} 💅 Pour votre retour cette semaine : {{offre}} rien que pour vous. Je réserve ? {{lien}}",
     },
   },
   {
@@ -70,21 +75,25 @@ export const METIERS: Metier[] = [
     ],
     overrides: {
       cycle_sms_1:
-        "{{prenom}}, votre coupe commence à perdre sa forme ✨ C'est le bon moment pour un rendez-vous. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+        "{{prenom}}, votre coupe commence à perdre sa forme ✂️ Je vous bloque un créneau cette semaine chez {{salon}} ? {{lien}}",
       cycle_sms_2:
-        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier passage 💇 Racines ou pointes réclament peut-être un petit soin. On vous trouve un moment ? {{lien}}",
+        "{{prenom}}, déjà {{semaines}} semaines ! Racines ou pointes réclament un petit coup de frais. Je vous garde un créneau cette semaine ? {{lien}}",
+      soft_sms_1:
+        "{{prenom}}, une envie de coupe fraîche ? 💇 J'ai de belles dispos cette semaine chez {{salon}} — je vous en réserve une ? {{lien}}",
       soft_sms_2:
-        "{{prenom}}, votre coiffeur vous réclame 😊 Si l'envie de rafraîchir votre coupe vous prend, on vous garde une place : {{lien}} — {{salon}}",
+        "{{prenom}}, ça fait un moment ! On rafraîchit votre coupe ou votre couleur ? Il me reste des créneaux cette semaine — je vous en garde un ? {{lien}} — {{salon}}",
       firstvisit_sms_1:
-        "{{prenom}}, j'espère que votre première visite chez {{salon}} vous a plu 💕 Pour garder une coupe nette, c'est le bon moment pour le prochain rdv. {{lien}}",
+        "{{prenom}}, j'espère que votre première visite vous a plu 💕 Pour garder une coupe nette, on se refait ça dans quelques semaines — je vous bloque le prochain rdv ? {{lien}}",
       birthday_sms_2:
-        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous une belle coupe pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous une belle coupe pour l'occasion — je vous garde le meilleur créneau ? {{lien}} — {{salon}}",
       novelty_sms_1:
-        "{{prenom}}, nouvelle saison, nouvelles envies ✨ On a des idées coupe & couleur pour vous chez {{salon}}. Votre créneau : {{lien}}",
+        "{{prenom}}, nouvelle saison, nouvelle tête ? ✨ J'ai des idées coupe & couleur pour vous chez {{salon}}. Je vous réserve un créneau ? {{lien}}",
       seasonal_sms_1:
-        "{{prenom}}, les fêtes approchent 🎄 Réservez votre coupe ou couleur chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+        "{{prenom}}, les fêtes approchent 🎄 Les créneaux coupe & couleur partent vite chez {{salon}} — je vous garde le vôtre ? {{lien}}",
       seasonal_sms_2:
-        "{{prenom}}, bientôt l'été ☀️ On vous prépare une coupe fraîche avant les vacances ? Votre créneau : {{lien}} — {{salon}}",
+        "{{prenom}}, bientôt l'été ☀️ Une coupe fraîche avant les vacances ? Je vous réserve un créneau avant la ruée : {{lien}} — {{salon}}",
+      winback_sms_1:
+        "{{prenom}}, ça fait trop longtemps ! Pour votre retour cette semaine chez {{salon}} : {{offre}} rien que pour vous. On bloque un créneau ? {{lien}}",
     },
   },
   {
@@ -99,21 +108,25 @@ export const METIERS: Metier[] = [
     ],
     overrides: {
       cycle_sms_1:
-        "{{prenom}}, la coupe et la barbe commencent à pousser 💈 C'est le moment de reprendre rendez-vous. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+        "{{prenom}}, la coupe et la barbe commencent à pousser 💈 Je vous bloque un créneau cette semaine chez {{salon}} ? {{lien}}",
       cycle_sms_2:
-        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier passage ✂️ Un petit rafraîchissement s'impose ? On vous trouve un créneau : {{lien}}",
+        "{{prenom}}, déjà {{semaines}} semaines ✂️ Un petit rafraîchissement s'impose. Je vous garde un créneau cette semaine ? {{lien}}",
+      soft_sms_1:
+        "{{prenom}}, il est temps de remettre la coupe et la barbe au carré 💈 J'ai des dispos cette semaine chez {{salon}} — je vous en garde une ? {{lien}}",
       soft_sms_2:
-        "{{prenom}}, ça fait un moment ! Quand vous voulez remettre la coupe et la barbe au carré, on vous garde une place : {{lien}} — {{salon}}",
+        "{{prenom}}, ça fait un moment ! On vous remet au propre ? Il me reste quelques créneaux cette semaine — je vous en garde un ? {{lien}} — {{salon}}",
       firstvisit_sms_1:
-        "{{prenom}}, j'espère que votre premier passage chez {{salon}} vous a plu 💈 Pour rester net, c'est le bon moment pour le prochain rdv. {{lien}}",
+        "{{prenom}}, content que votre premier passage chez {{salon}} vous ait plu 💈 Pour rester net, on se refait ça dans 3 semaines — je vous bloque le prochain ? {{lien}}",
       birthday_sms_2:
-        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous une coupe fraîche pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous une coupe fraîche pour l'occasion — je vous garde une place ? {{lien}} — {{salon}}",
       novelty_sms_1:
-        "{{prenom}}, nouveautés chez {{salon}} 💈 Nouveaux soins et finitions à tester. On vous garde un créneau ? {{lien}}",
+        "{{prenom}}, nouveaux soins et finitions chez {{salon}} 💈 Envie de tester ? Je vous réserve un créneau ? {{lien}}",
       seasonal_sms_1:
-        "{{prenom}}, les fêtes approchent 🎄 Réservez votre coupe chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+        "{{prenom}}, les fêtes approchent 🎄 Les créneaux partent vite chez {{salon}} — je vous garde le vôtre pour être net le jour J ? {{lien}}",
       seasonal_sms_2:
-        "{{prenom}}, bientôt l'été ☀️ Une coupe nette avant les vacances, ça vous dit ? Votre créneau : {{lien}} — {{salon}}",
+        "{{prenom}}, bientôt l'été ☀️ Une coupe nette avant les vacances ? Je vous réserve un créneau avant la ruée : {{lien}} — {{salon}}",
+      winback_sms_1:
+        "{{prenom}}, ça fait trop longtemps ! Pour votre retour cette semaine chez {{salon}} : {{offre}} rien que pour vous. On bloque un créneau ? {{lien}}",
     },
   },
   {
@@ -128,21 +141,25 @@ export const METIERS: Metier[] = [
     ],
     overrides: {
       cycle_sms_1:
-        "{{prenom}}, il est bientôt temps de renouveler votre soin ✨ Je vous garde un créneau cette semaine chez {{salon}} ? {{lien}}",
+        "{{prenom}}, il est temps de renouveler votre soin pour garder les résultats ✨ Je vous bloque un créneau cette semaine chez {{salon}} ? {{lien}}",
       cycle_sms_2:
-        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier soin 🌸 On vous trouve un moment pour prendre soin de vous ? {{lien}}",
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier soin 🌸 On prolonge les effets ? Je vous garde un créneau cette semaine ? {{lien}}",
+      soft_sms_1:
+        "{{prenom}}, un vrai moment détente vous ferait du bien 🌸 J'ai de belles dispos cette semaine chez {{salon}} — je vous en réserve une ? {{lien}}",
       soft_sms_2:
-        "{{prenom}}, vous nous manquez chez {{salon}} 😊 Un moment détente vous ferait du bien ? On vous garde une place : {{lien}}",
+        "{{prenom}}, envie de prendre soin de vous ? 😊 Il me reste quelques créneaux cette semaine chez {{salon}}. Je vous en garde un ? {{lien}}",
       firstvisit_sms_1:
-        "{{prenom}}, j'espère que votre premier soin chez {{salon}} vous a plu 💕 Pour prolonger les effets, c'est le bon moment pour le prochain rdv. {{lien}}",
+        "{{prenom}}, j'espère que votre premier soin vous a fait du bien 💕 Pour de vrais résultats, on enchaîne dans 3-4 semaines — je vous bloque le prochain rdv ? {{lien}}",
       birthday_sms_2:
-        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un vrai moment détente pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un vrai moment détente — je vous garde le meilleur créneau ? {{lien}} — {{salon}}",
       novelty_sms_1:
-        "{{prenom}}, nouveaux soins à découvrir chez {{salon}} ✨ Envie de tester ? Votre créneau vous attend : {{lien}}",
+        "{{prenom}}, nouveaux soins à découvrir chez {{salon}} ✨ Envie d'être parmi les premières à tester ? Je vous réserve un créneau ? {{lien}}",
       seasonal_sms_1:
-        "{{prenom}}, les fêtes approchent 🎄 Réservez votre soin chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+        "{{prenom}}, les fêtes approchent 🎄 Les créneaux partent vite chez {{salon}} — je vous garde le vôtre pour être au top ? {{lien}}",
       seasonal_sms_2:
-        "{{prenom}}, bientôt l'été ☀️ On vous prépare un soin avant les vacances ? Votre créneau : {{lien}} — {{salon}}",
+        "{{prenom}}, bientôt l'été ☀️ On vous prépare pour les vacances ? Je vous réserve un soin avant la ruée : {{lien}} — {{salon}}",
+      winback_sms_1:
+        "{{prenom}}, ça fait trop longtemps ! Pour votre retour cette semaine chez {{salon}} : {{offre}} rien que pour vous. Je vous réserve un moment ? {{lien}}",
     },
   },
   {
@@ -157,21 +174,25 @@ export const METIERS: Metier[] = [
     ],
     overrides: {
       cycle_sms_1:
-        "{{prenom}}, vos cils arrivent en fin de tenue ✨ C'est le moment idéal pour un remplissage. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+        "{{prenom}}, vos cils arrivent en fin de tenue ✨ Un remplissage et votre regard est comme neuf. Je vous bloque un créneau cette semaine ? {{lien}} — {{salon}}",
       cycle_sms_2:
-        "{{prenom}}, déjà {{semaines}} semaines depuis votre pose 👁️ Vos cils réclament sûrement un petit raccord. On vous trouve un moment ? {{lien}}",
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre pose 👁️ Un petit raccord s'impose. Je vous garde un créneau cette semaine ? {{lien}}",
+      soft_sms_1:
+        "{{prenom}}, envie de retrouver un regard de biche ? 👁️ J'ai de belles dispos cette semaine chez {{salon}} — je vous en réserve une ? {{lien}}",
       soft_sms_2:
-        "{{prenom}}, votre regard nous manque 😊 Si l'envie d'un nouveau regard vous prend, on vous garde une place : {{lien}} — {{salon}}",
+        "{{prenom}}, ça fait un moment ! On remet votre regard en valeur ? Il me reste quelques créneaux cette semaine — je vous en garde un ? {{lien}} — {{salon}}",
       firstvisit_sms_1:
-        "{{prenom}}, j'espère que votre première pose chez {{salon}} vous a plu 💕 Pour garder un regard parfait, c'est le bon moment pour le prochain rdv. {{lien}}",
+        "{{prenom}}, j'espère que votre première pose vous a plu 💕 Pour garder un regard parfait, le remplissage se joue maintenant — je vous bloque le prochain rdv ? {{lien}}",
       birthday_sms_2:
-        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un regard de fête pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un regard de fête — je vous garde le meilleur créneau ? {{lien}} — {{salon}}",
       novelty_sms_1:
-        "{{prenom}}, nouvelles techniques et volumes à découvrir chez {{salon}} ✨ Envie d'un nouveau regard ? Votre créneau : {{lien}}",
+        "{{prenom}}, nouvelles techniques et volumes à découvrir chez {{salon}} ✨ Envie d'un regard neuf ? Je vous réserve un créneau ? {{lien}}",
       seasonal_sms_1:
-        "{{prenom}}, les fêtes approchent 🎄 Réservez votre pose chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+        "{{prenom}}, les fêtes approchent 🎄 Les créneaux partent vite chez {{salon}} — je vous garde le vôtre pour un regard de fête ? {{lien}}",
       seasonal_sms_2:
-        "{{prenom}}, bientôt l'été ☀️ Un regard parfait sans mascara pour les vacances ? Votre créneau : {{lien}} — {{salon}}",
+        "{{prenom}}, bientôt l'été ☀️ Un regard parfait sans mascara pour les vacances ? Je vous réserve un créneau avant la ruée : {{lien}} — {{salon}}",
+      winback_sms_1:
+        "{{prenom}}, ça fait trop longtemps sans votre regard sublimé 👁️ Pour votre retour cette semaine : {{offre}} rien que pour vous. Je réserve ? {{lien}} — {{salon}}",
     },
   },
   {

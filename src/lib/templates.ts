@@ -32,12 +32,16 @@ export function renderTemplate(
 }
 
 /**
- * Scénarios de la bibliothèque (cf. modeles-reactivation-manucure.md).
+ * Scénarios de la bibliothèque.
  *  - `trigger` non nul = traité automatiquement par le scan quotidien.
  *  - `trigger` nul = modèle disponible pour un envoi manuel (nouveauté,
  *    créneau libéré, saisonnier, win-back) — conforme à « pas de remise par défaut ».
  *  - `scenario` pilote la sélection (at-risk → cycle, dormante courte → soft,
  *    longue → long) et la rotation entre variantes.
+ *
+ * Ton : chaleureux mais vendeur — une seule action, un peu d'urgence/rareté,
+ * un CTA formulé en question. Base neutre (tous métiers) ; les variantes
+ * spécifiques vivent dans `metiers.ts` (overrides par métier).
  */
 export type TemplateSeed = {
   key: string;
@@ -58,7 +62,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "cycle",
     subject: null,
-    body: "{{prenom}}, il est bientôt temps de reprendre rendez-vous ✨ Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+    body: "{{prenom}}, il est temps de reprendre rendez-vous avant que l'agenda ne se remplisse ✨ Je vous bloque un créneau cette semaine ? {{lien}} — {{salon}}",
   },
   {
     key: "cycle_sms_2",
@@ -67,7 +71,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "cycle",
     subject: null,
-    body: "{{prenom}}, déjà {{semaines}} semaines depuis votre dernière visite 😊 On vous trouve un moment pour un nouveau rendez-vous ? {{lien}}",
+    body: "{{prenom}}, déjà {{semaines}} semaines ! C'est le moment idéal pour repasser. Il me reste quelques créneaux cette semaine — je vous en garde un ? {{lien}}",
   },
   // B — Dormante douce (4 à 6 semaines, sans offre)
   {
@@ -77,7 +81,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "soft",
     subject: null,
-    body: "{{prenom}}, ça fait un moment qu'on ne vous a pas vue chez {{salon}} ! On serait ravies de vous retrouver. Votre créneau en 1 clic : {{lien}}",
+    body: "{{prenom}}, ça fait un moment qu'on ne vous a pas vu(e) chez {{salon}} ! J'aimerais vous retrouver — je vous réserve un créneau cette semaine ? {{lien}}",
   },
   {
     key: "soft_sms_2",
@@ -86,7 +90,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "soft",
     subject: null,
-    body: "{{prenom}}, vous nous manquez chez {{salon}} 😊 Si l'envie de repasser vous prend, on vous garde une place avec plaisir : {{lien}}",
+    body: "{{prenom}}, on ne va pas se perdre de vue 😊 J'ai encore de belles disponibilités cette semaine chez {{salon}}. Je vous en garde une ? {{lien}}",
   },
   // E — Dormante longue (8 semaines et +)
   {
@@ -96,7 +100,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "long",
     subject: null,
-    body: "{{prenom}}, ça fait un moment ! On ne voudrait pas vous oublier 😊 Si vous repassez ce mois-ci chez {{salon}}, on vous réserve une petite attention. {{lien}}",
+    body: "{{prenom}}, ça fait trop longtemps ! Pour vous donner une bonne raison de repasser ce mois-ci chez {{salon}}, je vous réserve une petite attention. On se voit quand ? {{lien}}",
   },
   {
     key: "long_sms_2",
@@ -105,7 +109,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "long",
     subject: null,
-    body: "{{prenom}}, la porte de {{salon}} vous est toujours grande ouverte. Quand vous voulez, on est là : {{lien}}",
+    body: "{{prenom}}, la porte de {{salon}} vous est grande ouverte — et j'ai hâte de vous revoir. Je vous trouve un créneau cette semaine ? {{lien}}",
   },
   // G — Post-première-visite (J+15)
   {
@@ -115,7 +119,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "post_first_visit",
     scenario: "firstvisit",
     subject: null,
-    body: "{{prenom}}, j'espère que votre première visite chez {{salon}} vous a plu 💕 C'est le bon moment pour reprendre rendez-vous. {{lien}}",
+    body: "{{prenom}}, merci pour votre première visite chez {{salon}} 💕 C'est en revenant maintenant qu'on garde le meilleur résultat — je vous bloque le prochain rdv ? {{lien}}",
   },
   {
     key: "firstvisit_sms_2",
@@ -124,7 +128,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "post_first_visit",
     scenario: "firstvisit",
     subject: null,
-    body: "{{prenom}}, ça nous a fait plaisir de vous accueillir ! On serait ravies de devenir VOTRE salon. À très vite ? {{lien}} — {{salon}}",
+    body: "{{prenom}}, ça m'a fait plaisir de vous accueillir ! J'adorerais devenir VOTRE adresse. On se refait ça bientôt ? Je vous garde une place : {{lien}} — {{salon}}",
   },
   // F — Anniversaire
   {
@@ -134,7 +138,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "birthday",
     scenario: "birthday",
     subject: null,
-    body: "Joyeux anniversaire {{prenom}} 🎉 Chez {{salon}}, on aimerait le fêter avec vous : une attention vous attend sur votre prochaine pose. {{lien}}",
+    body: "Joyeux anniversaire {{prenom}} 🎉 Pour fêter ça, {{salon}} vous gâte à votre prochain rdv. Je vous réserve le meilleur créneau ? {{lien}}",
   },
   {
     key: "birthday_sms_2",
@@ -143,7 +147,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "birthday",
     scenario: "birthday",
     subject: null,
-    body: "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un moment rien que pour vous, on s'occupe du reste. {{lien}} — {{salon}}",
+    body: "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un moment rien que pour vous — je vous garde une place de choix cette semaine ? {{lien}} — {{salon}}",
   },
   // J — Emails (format long)
   {
@@ -152,8 +156,8 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     channel: "email",
     trigger: "dormancy",
     scenario: "soft",
-    subject: "{{prenom}}, vous nous manquez 💫",
-    body: "Bonjour {{prenom}},\n\nÇa fait {{semaines}} semaines qu'on ne vous a pas vu(e) chez {{salon}}, et on s'est dit qu'un petit mot s'imposait.\n\nPas de grand discours : juste l'envie de vous retrouver et de prendre soin de vous comme la dernière fois.\n\nQuand vous voulez, votre créneau vous attend — il suffit d'un clic.\n\nÀ très vite,\nL'équipe {{salon}}",
+    subject: "{{prenom}}, on vous garde une place cette semaine ✨",
+    body: "Bonjour {{prenom}},\n\nÇa fait {{semaines}} semaines qu'on ne vous a pas vu(e) chez {{salon}} — et honnêtement, vous nous manquez.\n\nJ'ai encore de belles disponibilités cette semaine, et j'aimerais vraiment vous retrouver. Réserver votre créneau ne prend qu'un clic.\n\nJe vous garde une place ?\n\nÀ très vite,\nL'équipe {{salon}}",
   },
   {
     key: "long_email_1",
@@ -161,8 +165,8 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     channel: "email",
     trigger: "dormancy",
     scenario: "long",
-    subject: "{{prenom}}, la porte vous reste grande ouverte",
-    body: "Bonjour {{prenom}},\n\nCela fait un moment qu'on ne vous a pas accueilli(e) chez {{salon}}. On ne voulait pas vous oublier.\n\nSi l'envie de repasser vous prend, on serait vraiment ravis de vous revoir et de vous chouchouter.\n\nVotre créneau vous attend, en un clic.\n\nÀ bientôt peut-être,\nL'équipe {{salon}}",
+    subject: "{{prenom}}, une attention vous attend chez {{salon}}",
+    body: "Bonjour {{prenom}},\n\nCela fait un moment qu'on ne vous a pas accueilli(e) chez {{salon}}, et on ne voulait pas vous laisser filer.\n\nPour vous donner une bonne raison de repasser ce mois-ci, on vous réserve une petite attention à votre prochain rendez-vous.\n\nVotre créneau vous attend, en un clic.\n\nOn a hâte de vous revoir,\nL'équipe {{salon}}",
   },
   // C — Une raison de revenir / nouveauté (envoi manuel)
   {
@@ -172,7 +176,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "novelty",
     subject: null,
-    body: "{{prenom}}, on a des nouveautés à vous faire découvrir chez {{salon}} ✨ Envie d'en profiter ? Votre créneau vous attend : {{lien}}",
+    body: "{{prenom}}, du nouveau chez {{salon}} et j'ai pensé à vous ✨ Envie d'être parmi les premiers à tester ? Je vous réserve un créneau : {{lien}}",
   },
   {
     key: "novelty_sms_2",
@@ -181,7 +185,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "novelty",
     subject: null,
-    body: "{{prenom}}, nouveau chez {{salon}} : {{derniere_presta}}. Ça vous tente pour un prochain rendez-vous ? {{lien}}",
+    body: "{{prenom}}, nouveau chez {{salon}} : {{derniere_presta}}. Ça vous tente ? Je vous garde une place avant que ça parte : {{lien}}",
   },
   {
     key: "novelty_email_1",
@@ -189,8 +193,8 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     channel: "email",
     trigger: null,
     scenario: "novelty",
-    subject: "{{prenom}}, on a des nouveautés pour vous ✨",
-    body: "Bonjour {{prenom}},\n\nOn a quelques nouveautés à vous faire découvrir chez {{salon}} — et franchement, on pense qu'elles vous plairont.\n\nEnvie de vous faire plaisir et de tester quelque chose de nouveau à votre prochain rendez-vous ?\n\nOn a hâte de vous revoir,\nL'équipe {{salon}}",
+    subject: "{{prenom}}, en avant-première chez {{salon}} ✨",
+    body: "Bonjour {{prenom}},\n\nOn vient de rentrer des nouveautés chez {{salon}} — et on a tout de suite pensé que ça vous plairait.\n\nEnvie d'être parmi les premiers à en profiter ? Les meilleurs créneaux partent vite, alors je préfère vous prévenir.\n\nJe vous réserve un moment ?\n\nÀ très vite,\nL'équipe {{salon}}",
   },
   // D — Créneau qui se libère (envoi manuel, heures creuses)
   {
@@ -200,7 +204,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "slot",
     subject: null,
-    body: "{{prenom}}, une place vient de se libérer ce {{jour}} chez {{salon}}. Elle est pour vous si ça vous tente : {{lien}}",
+    body: "{{prenom}}, une place vient de se libérer ce {{jour}} chez {{salon}} — c'est rare ! Je vous la réserve ? {{lien}}",
   },
   {
     key: "slot_sms_2",
@@ -209,7 +213,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "slot",
     subject: null,
-    body: "{{prenom}}, annulation de dernière minute = un créneau dispo {{jour}} après-midi. Je vous le réserve ? {{lien}} — {{salon}}",
+    body: "{{prenom}}, annulation de dernière minute = un créneau libre {{jour}}. Le premier qui répond le prend 😉 Je vous le garde ? {{lien}} — {{salon}}",
   },
   // H — Saisonnier / événementiel (envoi manuel)
   {
@@ -219,7 +223,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "seasonal",
     subject: null,
-    body: "{{prenom}}, les fêtes approchent 🎄 Réservez votre rendez-vous chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+    body: "{{prenom}}, les fêtes approchent 🎄 Les créneaux partent vite chez {{salon}} — je vous réserve le vôtre avant que tout soit pris ? {{lien}}",
   },
   {
     key: "seasonal_sms_2",
@@ -228,7 +232,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "seasonal",
     subject: null,
-    body: "{{prenom}}, bientôt l'été ☀️ On vous prépare un moment beauté avant les vacances ? Votre créneau : {{lien}} — {{salon}}",
+    body: "{{prenom}}, l'été arrive ☀️ On vous prépare pour les vacances ? Je vous garde un créneau avant la ruée : {{lien}} — {{salon}}",
   },
   // I — Win-back avec offre (à utiliser RAREMENT)
   {
@@ -238,7 +242,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "winback",
     subject: null,
-    body: "{{prenom}}, parce que ça fait trop longtemps : {{offre}} sur votre retour chez {{salon}} cette semaine 💅 Votre créneau : {{lien}}",
+    body: "{{prenom}}, ça fait vraiment trop longtemps ! Pour vous revoir cette semaine chez {{salon}} : {{offre}} rien que pour vous. Je vous réserve un créneau ? {{lien}}",
   },
 ];
 
@@ -274,7 +278,7 @@ export const DEFAULT_CAMPAIGNS: CampaignSeed[] = [
   },
 ];
 
-/** Scénario à utiliser selon le déclencheur et la situation de la cliente. */
+/** Scénario à utiliser selon le déclencheur et la situation du client. */
 export function scenarioFor(
   trigger: CampaignTrigger,
   opts: { status: string; weeksSinceVisit: number | null },
