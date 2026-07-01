@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { notifySalon } from "@/lib/notifications";
-import { enforceOneTrialPerCard } from "@/lib/trial-abuse";
+import { enforceTrialEligibility } from "@/lib/trial-abuse";
 
 export const dynamic = "force-dynamic";
 
@@ -117,8 +117,8 @@ export async function POST(req: NextRequest) {
           );
           await applySubscription(sub);
           await resetQuota({ id: salonId }, periodEndOf(sub));
-          // Anti-abus : un essai gratuit par carte. Coupe l'essai si réutilisée.
-          const trialCut = await enforceOneTrialPerCard(
+          // Anti-abus : pas d'essai pour carte prépayée/réutilisée.
+          const trialCut = await enforceTrialEligibility(
             stripe,
             sub,
             salonId,

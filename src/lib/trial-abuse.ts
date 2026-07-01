@@ -1,11 +1,11 @@
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
-/** Empreinte de la carte par défaut d'un abonnement (via l'abonnement ou le client). */
-async function cardFingerprint(
+/** Carte par défaut d'un abonnement (via l'abonnement ou le client). */
+async function cardOf(
   stripe: Stripe,
   sub: Stripe.Subscription,
-): Promise<string | null> {
+): Promise<Stripe.PaymentMethod.Card | null> {
   let pmId: string | null =
     typeof sub.default_payment_method === "string"
       ? sub.default_payment_method
@@ -23,38 +23,48 @@ async function cardFingerprint(
   if (!pmId) return null;
 
   const pm = await stripe.paymentMethods.retrieve(pmId);
-  return pm.card?.fingerprint ?? null;
+  return pm.card ?? null;
 }
 
 /**
- * Anti-abus d'essai : un seul essai gratuit par carte bancaire.
- * Si la carte de cet abonnement a déjà servi à un essai sur un AUTRE salon,
- * on met fin à l'essai immédiatement (débit direct — plus de gratuité).
- * Best-effort : ne bloque jamais le flux. Renvoie true si l'essai a été coupé.
+ * Anti-abus d'essai. Deux garde-fous, sans aucune friction pour un vrai client :
+ *  1. Cartes prépayées / virtuelles (jetables) → pas d'essai gratuit.
+ *  2. Une carte = un seul essai (empreinte stable, même entre comptes).
+ * Si l'un se déclenche, l'essai est coupé immédiatement (trial_end:now → débit
+ * direct). Best-effort : ne bloque jamais le flux. Renvoie true si coupé.
  */
-export async function enforceOneTrialPerCard(
+export async function enforceTrialEligibility(
   stripe: Stripe,
   sub: Stripe.Subscription,
   salonId: string,
 ): Promise<boolean> {
   if (sub.status !== "trialing") return false;
   try {
-    const fingerprint = await cardFingerprint(stripe, sub);
+    const card = await cardOf(stripe, sub);
+    if (!card) return false;
+
+    // 1) Carte prépayée / virtuelle → l'outil n°1 du multi-essai : pas de gratuité.
+    if (card.funding === "prepaid") {
+      await stripe.subscriptions
+        .update(sub.id, { trial_end: "now" })
+        .catch(() => {});
+      return true;
+    }
+
+    // 2) Un essai gratuit par carte (empreinte).
+    const fingerprint = card.fingerprint;
     if (!fingerprint) return false;
 
     const existing = await prisma.trialCard.findUnique({
       where: { fingerprint },
     });
-
     if (existing && existing.salonId !== salonId) {
-      // Carte déjà utilisée pour un essai ailleurs → on coupe l'essai.
       await stripe.subscriptions
         .update(sub.id, { trial_end: "now" })
         .catch(() => {});
       return true;
     }
     if (!existing) {
-      // Première utilisation de cette carte → on l'enregistre.
       await prisma.trialCard
         .create({ data: { fingerprint, salonId } })
         .catch(() => {});
