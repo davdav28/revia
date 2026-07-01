@@ -10,12 +10,12 @@ const STEPS = [
   {
     icon: CalendarCheck,
     title: "Capter",
-    text: "Qui est venue, quand, pour quel soin, à quel prix. Importez votre fichier ou ajoutez les passages au fil de l'eau.",
+    text: "Qui est venu, quand, pour quelle prestation, à quel prix. Importez votre fichier ou ajoutez les passages au fil de l'eau.",
   },
   {
     icon: ScanLine,
     title: "Détecter",
-    text: `${BRAND.name} connaît le cycle de l'ongle. Il repère les clientes qui auraient dû revenir — en semaines, pas en mois.`,
+    text: `${BRAND.name} sait à quel rythme chaque client devrait revenir. Il repère ceux qui ont dépassé la date — en semaines, pas en mois.`,
   },
   {
     icon: Send,
@@ -29,9 +29,32 @@ const STEPS = [
   },
 ];
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://reviagence.com";
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: BRAND.name,
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  url: SITE_URL,
+  inLanguage: "fr-FR",
+  description: BRAND.description,
+  offers: {
+    "@type": "Offer",
+    price: "69",
+    priceCurrency: "EUR",
+  },
+};
+
 export default function Home() {
   return (
     <div className="flex min-h-full flex-col">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       {/* En-tête */}
       <header className="border-line border-b">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -40,8 +63,8 @@ export default function Home() {
             <a href="#boucle" className="hover:text-ink">
               Comment ça marche
             </a>
-            <a href="#onglerie" className="hover:text-ink">
-              Pour l'onglerie
+            <a href="#metiers" className="hover:text-ink">
+              Votre métier
             </a>
             <Link href="/tarifs" className="hover:text-ink">
               Tarifs
@@ -62,13 +85,13 @@ export default function Home() {
       <section className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-6 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <div>
           <Badge tone="nude" className="mb-6">
-            Réactivation client · salons d'onglerie
+            Réactivation client · beauté & bien-être
           </Badge>
           <h1 className="font-display text-ink text-4xl leading-[1.05] font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
             {BRAND.tagline}
           </h1>
           <p className="text-muted mt-6 max-w-xl text-lg leading-relaxed">
-            Une partie de vos clientes ne revient plus — pas par mécontentement,
+            Une partie de vos clients ne revient plus — pas par mécontentement,
             juste par oubli. {BRAND.name} les repère, les relance au bon moment
             et vous montre le chiffre d'affaires récupéré.
           </p>
@@ -105,7 +128,7 @@ export default function Home() {
                 <div className="tabular text-ink text-2xl font-semibold">
                   12
                 </div>
-                <div className="text-muted text-sm">clientes revenues</div>
+                <div className="text-muted text-sm">clients revenus</div>
               </div>
               <div>
                 <div className="tabular text-ink text-2xl font-semibold">3</div>
@@ -123,7 +146,7 @@ export default function Home() {
             {BRAND.name} referme le cycle en quatre temps
           </h2>
           <p className="text-muted mt-3 max-w-2xl">
-            De la dernière visite à la cliente qui repasse la porte,{" "}
+            De la dernière visite au client qui repasse la porte,{" "}
             {BRAND.name} s'occupe de tout — vous gardez la main.
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -147,25 +170,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pourquoi l'onglerie */}
-      <section id="onglerie" className="mx-auto max-w-6xl px-6 py-20">
+      {/* Pourquoi la beauté & le bien-être */}
+      <section id="metiers" className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <h2 className="font-display text-ink text-3xl font-bold tracking-tight">
-              En onglerie, chaque semaine compte
+              Dans la beauté, chaque semaine compte
             </h2>
             <p className="text-muted mt-4 leading-relaxed">
-              Une cliente revient toutes les 2 à 4 semaines : trois semaines
-              pour un remplissage de semi-permanent, quatre pour une pose
-              complète. La fenêtre est courte. {BRAND.name} relance pile au
-              moment où elle hésite — avant qu'elle n'aille tester le salon d'à
-              côté.
+              Ongles à remplir, couleur qui repousse, barbe à retailler, soin à
+              renouveler : vos clients reviennent à un rythme régulier — souvent
+              toutes les 2 à 6 semaines. La fenêtre est courte. {BRAND.name}{" "}
+              relance pile au moment où le client hésite — avant qu'il n'aille
+              tester le salon d'à côté.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { v: "3 sem.", l: "remplissage semi-permanent" },
-              { v: "4 sem.", l: "pose complète" },
+              { v: "2–6 sem.", l: "le rythme de retour selon la prestation" },
+              { v: "1 sur 4", l: "ne revient jamais, faute d'un rappel" },
               { v: "2× plus", l: "de retours quand on relance à temps" },
             ].map((stat) => (
               <div
@@ -188,7 +211,7 @@ export default function Home() {
           <div>
             <Logo className="text-lg" />
             <p className="text-muted mt-2 max-w-xs text-sm">
-              Le cycle de l'ongle est une boucle. On la referme avec vous.
+              Le retour de vos clients est une boucle. On la referme avec vous.
             </p>
           </div>
           <div className="text-muted flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">

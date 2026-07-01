@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 /** Argumentaire court par formule (copie marketing, pas de la config métier). */
 const BULLETS: Record<PlanId, string[]> = {
   essentiel: [
-    "Détection des clientes dormantes",
+    "Détection des clients dormants",
     "Tous les scénarios de relance",
     "Dashboard de CA récupéré",
     "1 salon · 1 utilisateur",

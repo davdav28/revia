@@ -70,7 +70,7 @@ export async function signupAction(
           slug,
           // Carte requise à l'inscription : l'essai démarre au paiement (Stripe).
           subscriptionStatus: "incomplete",
-          // Catalogue de prestations onglerie pré-rempli.
+          // Catalogue de prestations de démarrage pré-rempli.
           services: { create: DEFAULT_SERVICES },
         },
         select: { id: true },

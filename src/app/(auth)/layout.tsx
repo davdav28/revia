@@ -3,7 +3,7 @@ import { Logo } from "@/components/brand/logo";
 import { BRAND } from "@/config/brand";
 
 const POINTS = [
-  "Détecte les clientes qui ne reviennent plus.",
+  "Détecte les clients qui ne reviennent plus.",
   "Les relance au bon moment, par SMS ou email.",
   "Vous montre le chiffre d'affaires récupéré.",
 ];
@@ -34,7 +34,7 @@ export default function AuthLayout({
           </ul>
         </div>
         <p className="text-sm text-[var(--nude)]/70">
-          Le cycle de l'ongle est une boucle. On la referme avec vous.
+          Le retour de vos clients est une boucle. On la referme avec vous.
         </p>
       </aside>
 

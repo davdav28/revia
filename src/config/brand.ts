@@ -9,12 +9,27 @@ export const BRAND = {
   /** Nom du produit (dérivé de « revenir »). Centralisé : changeable ici. */
   name: "Revia",
   /** Promesse en une ligne, utilisée dans les métadonnées et le hero. */
-  tagline: "Vos clientes reviennent. Vous le prouvez.",
+  tagline: "Vos clients reviennent. Vous le prouvez.",
   /**
    * Description courte (SEO, partages). Pas de jargon : on parle métier.
    */
   description:
-    "Revia repère les clientes qui ne reviennent plus, les relance au bon moment et vous montre le chiffre d'affaires récupéré.",
+    "Revia réactive les clients qui ne reviennent plus dans les salons de beauté et de bien-être : détection automatique, relance au bon moment par SMS, et preuve du chiffre d'affaires récupéré.",
+  /**
+   * Métiers ciblés (beauté & bien-être). Sert au SEO (mots-clés, données
+   * structurées) et au copy — parler à chaque profession sans réécrire le code.
+   */
+  audiences: [
+    "onglerie",
+    "coiffure",
+    "barbier",
+    "institut de beauté",
+    "esthétique",
+    "spa",
+    "massage",
+    "tatouage",
+    "cils & sourcils",
+  ],
   /** Nom d'expéditeur SMS par défaut (≤ 11 caractères, contrainte opérateurs). */
   smsSenderDefault: "Revia",
   /** Locale et fuseau par défaut (marché France). */

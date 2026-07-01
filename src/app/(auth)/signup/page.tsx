@@ -10,7 +10,7 @@ export default function SignupPage() {
         Créer votre salon
       </h1>
       <p className="text-muted mt-1 text-sm">
-        Quelques secondes pour commencer à récupérer vos clientes.
+        Quelques secondes pour commencer à récupérer vos clients.
       </p>
       <div className="mt-8">
         <SignupForm />

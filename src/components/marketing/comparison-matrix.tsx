@@ -87,7 +87,7 @@ const GROUPS: Group[] = [
       { label: "Relance auto SMS + email", cells: [true, true, true] },
       { label: "Compteur de CA récupéré", cells: [true, true, true] },
       { label: "Modèles de messages éditables", cells: [true, true, true] },
-      { label: "Import fichier clientes (CSV)", cells: [true, true, true] },
+      { label: "Import fichier clients (CSV)", cells: [true, true, true] },
       { label: "Agenda / saisie des visites", cells: [true, true, true] },
       { label: "Gestion opt-out / RGPD", cells: [true, true, true] },
     ],
@@ -106,7 +106,7 @@ const GROUPS: Group[] = [
   {
     title: "Profondeur",
     rows: [
-      { label: "Segmentation avancée des clientes", cells: [true, true, true] },
+      { label: "Segmentation avancée des clients", cells: [true, true, true] },
       { label: "A/B testing des messages", cells: [true, true, true] },
       { label: "Page de réservation en ligne", cells: [true, true, true] },
       {

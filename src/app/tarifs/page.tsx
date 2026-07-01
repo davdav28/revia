@@ -11,7 +11,7 @@ import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 export const metadata: Metadata = {
   title: "Tarifs",
   description:
-    "Trois formules simples pour réactiver vos clientes. Vous payez le volume, pas les fonctionnalités. Essai gratuit de 30 jours, sans engagement.",
+    "Trois formules simples pour réactiver vos clients, dans les salons de beauté et de bien-être. Vous payez le volume, pas les fonctionnalités. Essai gratuit de 30 jours, sans engagement.",
 };
 
 export default function TarifsPage() {
@@ -45,13 +45,13 @@ export default function TarifsPage() {
       {/* Hero */}
       <section className="mx-auto w-full max-w-3xl px-6 pt-16 pb-4 text-center">
         <Badge tone="nude" className="mb-6">
-          Réactivation client · salons d'onglerie
+          Réactivation client · beauté & bien-être
         </Badge>
         <h1 className="font-display text-ink text-4xl leading-[1.05] font-extrabold tracking-tight sm:text-5xl">
-          Vos clientes reviennent. Sans que vous y pensiez.
+          Vos clients reviennent. Sans que vous y pensiez.
         </h1>
         <p className="text-muted mx-auto mt-5 max-w-xl text-lg leading-relaxed">
-          {BRAND.name} repère les clientes qui ne reviennent plus et les relance
+          {BRAND.name} repère les clients qui ne reviennent plus et les relance
           au bon moment. Vous ne touchez à rien — vous voyez juste le chiffre
           d'affaires rentrer.
         </p>

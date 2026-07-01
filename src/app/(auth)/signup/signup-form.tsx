@@ -39,7 +39,7 @@ export function SignupForm() {
         <Input
           id="salonName"
           name="salonName"
-          placeholder="Studio Ongles & Co"
+          placeholder="Studio Beauté & Co"
           aria-invalid={!!state.fieldErrors?.salonName}
           required
         />
