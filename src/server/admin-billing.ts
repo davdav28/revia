@@ -132,9 +132,12 @@ export async function createCustomMultiCheckout(input: {
           unit_amount: overageCents,
           nickname: `Surplus SMS sur-mesure — ${overageCents} c`,
           product: productId,
-          recurring: meterId
-            ? { interval, meter: meterId }
-            : { interval, usage_type: "metered" },
+          // Un prix ne peut porter un compteur que s'il est `metered`.
+          recurring: {
+            interval,
+            usage_type: "metered",
+            ...(meterId ? { meter: meterId } : {}),
+          },
         });
         lineItems.push({ price: customMeterPrice.id });
       } else {
