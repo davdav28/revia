@@ -346,6 +346,19 @@ model Suggestion {
   @@index([salonId])
 }
 
+/// Message de contact public (formulaire « Parler à l'équipe » de la page tarifs).
+/// Non lié à un salon : c'est un prospect.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 /// La preuve : une cliente relancée qui reprend rendez-vous. Alimente le dashboard.
 model Recovery {
   id                   String   @id @default(cuid())
