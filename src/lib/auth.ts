@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import type { Salon, User, UserRole } from "@prisma/client";
 
@@ -84,5 +85,15 @@ export async function requireMember(): Promise<Member> {
 export async function requireOwner(): Promise<Member> {
   const member = await requireMember();
   if (member.role !== "owner") redirect("/dashboard");
+  return member;
+}
+
+/**
+ * Réservé au fondateur (outils internes : facturation sur-mesure…). Toute
+ * personne non listée dans `ADMIN_EMAILS` est renvoyée au tableau de bord.
+ */
+export async function requireAdmin(): Promise<Member> {
+  const member = await requireMember();
+  if (!isAdminEmail(member.email)) redirect("/dashboard");
   return member;
 }

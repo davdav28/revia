@@ -7,8 +7,10 @@ import {
   Download,
   Clock,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 import { requireMember } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app/page-header";
 import {
@@ -169,6 +171,25 @@ export default async function ReglagesPage() {
           />
         </CardContent>
       </Card>
+
+      {isAdminEmail(member.email) ? (
+        <Link href="/admin" className="block">
+          <Card className="hover:bg-nude-soft/40 transition-colors">
+            <CardContent className="flex items-center gap-4 py-5">
+              <div className="bg-nude-soft text-lacquer-ink flex size-10 items-center justify-center rounded-md">
+                <ShieldCheck className="size-5" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-base">Espace fondateur</CardTitle>
+                <CardDescription>
+                  Outils internes — abonnements sur-mesure.
+                </CardDescription>
+              </div>
+              <ChevronRight className="text-muted size-5" />
+            </CardContent>
+          </Card>
+        </Link>
+      ) : null}
 
       <Card>
         <CardHeader>
