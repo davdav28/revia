@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { loginSchema, signupSchema } from "@/lib/validations/auth";
 import { normalizeMetier, servicesForMetier } from "@/lib/metiers";
+import { toSmsSender } from "@/lib/sms-sender";
 import { seedReactivationDefaults } from "@/lib/reactivation/seed";
 import { generateUniqueSlug } from "@/lib/slug";
 
@@ -71,6 +72,8 @@ export async function signupAction(
           name: salonName,
           slug,
           metier,
+          // Expéditeur SMS = nom du salon (nettoyé), modifiable ensuite.
+          senderName: toSmsSender(salonName),
           // Carte requise à l'inscription : l'essai démarre au paiement (Stripe).
           subscriptionStatus: "incomplete",
           // Prestations de démarrage adaptées au métier choisi.

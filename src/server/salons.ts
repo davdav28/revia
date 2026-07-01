@@ -6,6 +6,7 @@ import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { salonLimitFor } from "@/lib/team";
 import { normalizeMetier, servicesForMetier } from "@/lib/metiers";
+import { toSmsSender } from "@/lib/sms-sender";
 import { seedReactivationDefaults } from "@/lib/reactivation/seed";
 import { generateUniqueSlug } from "@/lib/slug";
 
@@ -57,6 +58,7 @@ export async function createSalon(
       name: parsed.data,
       slug,
       metier: salonMetier,
+      senderName: toSmsSender(parsed.data),
       services: { create: servicesForMetier(salonMetier) },
     },
     select: { id: true },
