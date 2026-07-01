@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { loginSchema, signupSchema } from "@/lib/validations/auth";
-import { DEFAULT_SERVICES } from "@/lib/default-services";
+import { normalizeMetier, servicesForMetier } from "@/lib/metiers";
 import { seedReactivationDefaults } from "@/lib/reactivation/seed";
 import { generateUniqueSlug } from "@/lib/slug";
 
@@ -38,6 +38,7 @@ export async function signupAction(
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    metier: formData.get("metier"),
   });
 
   if (!parsed.success) {
@@ -45,6 +46,7 @@ export async function signupAction(
   }
 
   const { salonName, name, email, password } = parsed.data;
+  const metier = normalizeMetier(parsed.data.metier);
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -68,10 +70,11 @@ export async function signupAction(
         data: {
           name: salonName,
           slug,
+          metier,
           // Carte requise à l'inscription : l'essai démarre au paiement (Stripe).
           subscriptionStatus: "incomplete",
-          // Catalogue de prestations de démarrage pré-rempli.
-          services: { create: DEFAULT_SERVICES },
+          // Prestations de démarrage adaptées au métier choisi.
+          services: { create: servicesForMetier(metier) },
         },
         select: { id: true },
       });
@@ -90,8 +93,8 @@ export async function signupAction(
       await prisma.membership.create({
         data: { userId: owner.id, salonId: salon.id, role: "owner" },
       });
-      // Modèles de messages + campagnes de relance par défaut.
-      await seedReactivationDefaults(salon.id);
+      // Modèles de messages + campagnes de relance adaptés au métier.
+      await seedReactivationDefaults(salon.id, metier);
     }
 
     // Email confirmation désactivée → session immédiate. Sinon, on invite à

@@ -74,6 +74,8 @@ model Salon {
   timezone   String   @default("Europe/Paris")
   phone      String?
   address    String?
+  // Métier (beauté & bien-être) : pilote les prestations et modèles de départ.
+  metier     String   @default("autre")
 
   // Paramètres de dormance (paramétrables par salon)
   defaultCycleDays Int @default(28) // cycle de retour par défaut (sans prestation connue)

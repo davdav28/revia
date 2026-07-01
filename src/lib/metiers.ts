@@ -1,0 +1,221 @@
+import { DEFAULT_TEMPLATES, type TemplateSeed } from "@/lib/templates";
+import { DEFAULT_SERVICES } from "@/lib/default-services";
+
+/**
+ * Packs par métier (beauté & bien-être). Chaque métier fournit ses prestations
+ * de départ et des variantes de modèles de messages adaptées à son vocabulaire.
+ * Tout est éditable ensuite par le salon — ce ne sont que des points de départ.
+ *
+ * Les modèles reposent sur une base neutre (`DEFAULT_TEMPLATES`). Un métier ne
+ * surcharge que les modèles où son vocabulaire change vraiment (`overrides`) ;
+ * les autres restent neutres.
+ */
+export type MetierId =
+  | "onglerie"
+  | "coiffure"
+  | "barbier"
+  | "esthetique"
+  | "cils"
+  | "autre";
+
+export type MetierService = {
+  name: string;
+  priceCents: number;
+  defaultIntervalDays: number | null;
+};
+
+/** Un override = juste le corps (SMS), ou { subject, body } pour un email. */
+type TemplateOverride = string | { subject?: string | null; body: string };
+
+type Metier = {
+  id: MetierId;
+  label: string;
+  services: MetierService[];
+  overrides: Record<string, TemplateOverride>;
+};
+
+export const METIERS: Metier[] = [
+  {
+    id: "onglerie",
+    label: "Onglerie / manucure",
+    services: DEFAULT_SERVICES,
+    overrides: {
+      cycle_sms_1:
+        "{{prenom}}, vos ongles arrivent en fin de tenue ✨ C'est le moment idéal pour un remplissage. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+      cycle_sms_2:
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre pose 💅 Vos ongles réclament sûrement un petit raccord. On vous trouve un moment ? {{lien}}",
+      soft_sms_2:
+        "{{prenom}}, vos ongles nous manquent 😊 Si l'envie de repasser vous prend, on vous garde une place avec plaisir : {{lien}} — {{salon}}",
+      firstvisit_sms_1:
+        "{{prenom}}, j'espère que votre première pose chez {{salon}} vous a plu 💕 Pour garder de belles mains, c'est le bon moment pour le prochain rdv. {{lien}}",
+      birthday_sms_2:
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous des ongles parfaits pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+      novelty_sms_1:
+        "{{prenom}}, on vient de rentrer les nouvelles teintes de la saison chez {{salon}} 💅 Envie d'en tester une ? Votre créneau vous attend : {{lien}}",
+      seasonal_sms_1:
+        "{{prenom}}, les fêtes approchent 🎄 Réservez vos ongles de fête chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+      seasonal_sms_2:
+        "{{prenom}}, bientôt l'été ☀️ On vous prépare des ongles parfaits pour les sandales ? Votre créneau : {{lien}} — {{salon}}",
+    },
+  },
+  {
+    id: "coiffure",
+    label: "Coiffure",
+    services: [
+      { name: "Coupe femme", priceCents: 3500, defaultIntervalDays: 42 },
+      { name: "Coupe homme", priceCents: 2000, defaultIntervalDays: 28 },
+      { name: "Couleur", priceCents: 5500, defaultIntervalDays: 35 },
+      { name: "Balayage / mèches", priceCents: 8000, defaultIntervalDays: 70 },
+      { name: "Brushing", priceCents: 2500, defaultIntervalDays: null },
+    ],
+    overrides: {
+      cycle_sms_1:
+        "{{prenom}}, votre coupe commence à perdre sa forme ✨ C'est le bon moment pour un rendez-vous. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+      cycle_sms_2:
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier passage 💇 Racines ou pointes réclament peut-être un petit soin. On vous trouve un moment ? {{lien}}",
+      soft_sms_2:
+        "{{prenom}}, votre coiffeur vous réclame 😊 Si l'envie de rafraîchir votre coupe vous prend, on vous garde une place : {{lien}} — {{salon}}",
+      firstvisit_sms_1:
+        "{{prenom}}, j'espère que votre première visite chez {{salon}} vous a plu 💕 Pour garder une coupe nette, c'est le bon moment pour le prochain rdv. {{lien}}",
+      birthday_sms_2:
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous une belle coupe pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+      novelty_sms_1:
+        "{{prenom}}, nouvelle saison, nouvelles envies ✨ On a des idées coupe & couleur pour vous chez {{salon}}. Votre créneau : {{lien}}",
+      seasonal_sms_1:
+        "{{prenom}}, les fêtes approchent 🎄 Réservez votre coupe ou couleur chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+      seasonal_sms_2:
+        "{{prenom}}, bientôt l'été ☀️ On vous prépare une coupe fraîche avant les vacances ? Votre créneau : {{lien}} — {{salon}}",
+    },
+  },
+  {
+    id: "barbier",
+    label: "Barbier",
+    services: [
+      { name: "Coupe homme", priceCents: 2500, defaultIntervalDays: 21 },
+      { name: "Taille de barbe", priceCents: 1500, defaultIntervalDays: 21 },
+      { name: "Coupe + barbe", priceCents: 3500, defaultIntervalDays: 21 },
+      { name: "Rasage traditionnel", priceCents: 3000, defaultIntervalDays: null },
+      { name: "Contours / finitions", priceCents: 1000, defaultIntervalDays: 14 },
+    ],
+    overrides: {
+      cycle_sms_1:
+        "{{prenom}}, la coupe et la barbe commencent à pousser 💈 C'est le moment de reprendre rendez-vous. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+      cycle_sms_2:
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier passage ✂️ Un petit rafraîchissement s'impose ? On vous trouve un créneau : {{lien}}",
+      soft_sms_2:
+        "{{prenom}}, ça fait un moment ! Quand vous voulez remettre la coupe et la barbe au carré, on vous garde une place : {{lien}} — {{salon}}",
+      firstvisit_sms_1:
+        "{{prenom}}, j'espère que votre premier passage chez {{salon}} vous a plu 💈 Pour rester net, c'est le bon moment pour le prochain rdv. {{lien}}",
+      birthday_sms_2:
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous une coupe fraîche pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+      novelty_sms_1:
+        "{{prenom}}, nouveautés chez {{salon}} 💈 Nouveaux soins et finitions à tester. On vous garde un créneau ? {{lien}}",
+      seasonal_sms_1:
+        "{{prenom}}, les fêtes approchent 🎄 Réservez votre coupe chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+      seasonal_sms_2:
+        "{{prenom}}, bientôt l'été ☀️ Une coupe nette avant les vacances, ça vous dit ? Votre créneau : {{lien}} — {{salon}}",
+    },
+  },
+  {
+    id: "esthetique",
+    label: "Institut / esthétique",
+    services: [
+      { name: "Soin du visage", priceCents: 6000, defaultIntervalDays: 35 },
+      { name: "Épilation demi-jambes", priceCents: 2500, defaultIntervalDays: 28 },
+      { name: "Épilation maillot", priceCents: 2000, defaultIntervalDays: 28 },
+      { name: "Beauté des mains", priceCents: 3000, defaultIntervalDays: 28 },
+      { name: "Massage 30 min", priceCents: 4000, defaultIntervalDays: null },
+    ],
+    overrides: {
+      cycle_sms_1:
+        "{{prenom}}, il est bientôt temps de renouveler votre soin ✨ Je vous garde un créneau cette semaine chez {{salon}} ? {{lien}}",
+      cycle_sms_2:
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre dernier soin 🌸 On vous trouve un moment pour prendre soin de vous ? {{lien}}",
+      soft_sms_2:
+        "{{prenom}}, vous nous manquez chez {{salon}} 😊 Un moment détente vous ferait du bien ? On vous garde une place : {{lien}}",
+      firstvisit_sms_1:
+        "{{prenom}}, j'espère que votre premier soin chez {{salon}} vous a plu 💕 Pour prolonger les effets, c'est le bon moment pour le prochain rdv. {{lien}}",
+      birthday_sms_2:
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un vrai moment détente pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+      novelty_sms_1:
+        "{{prenom}}, nouveaux soins à découvrir chez {{salon}} ✨ Envie de tester ? Votre créneau vous attend : {{lien}}",
+      seasonal_sms_1:
+        "{{prenom}}, les fêtes approchent 🎄 Réservez votre soin chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+      seasonal_sms_2:
+        "{{prenom}}, bientôt l'été ☀️ On vous prépare un soin avant les vacances ? Votre créneau : {{lien}} — {{salon}}",
+    },
+  },
+  {
+    id: "cils",
+    label: "Cils & sourcils",
+    services: [
+      { name: "Extensions de cils (pose)", priceCents: 8000, defaultIntervalDays: 28 },
+      { name: "Remplissage cils", priceCents: 4500, defaultIntervalDays: 21 },
+      { name: "Rehaussement de cils", priceCents: 5500, defaultIntervalDays: 42 },
+      { name: "Teinture des sourcils", priceCents: 2000, defaultIntervalDays: 28 },
+      { name: "Restructuration sourcils", priceCents: 2500, defaultIntervalDays: 28 },
+    ],
+    overrides: {
+      cycle_sms_1:
+        "{{prenom}}, vos cils arrivent en fin de tenue ✨ C'est le moment idéal pour un remplissage. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+      cycle_sms_2:
+        "{{prenom}}, déjà {{semaines}} semaines depuis votre pose 👁️ Vos cils réclament sûrement un petit raccord. On vous trouve un moment ? {{lien}}",
+      soft_sms_2:
+        "{{prenom}}, votre regard nous manque 😊 Si l'envie d'un nouveau regard vous prend, on vous garde une place : {{lien}} — {{salon}}",
+      firstvisit_sms_1:
+        "{{prenom}}, j'espère que votre première pose chez {{salon}} vous a plu 💕 Pour garder un regard parfait, c'est le bon moment pour le prochain rdv. {{lien}}",
+      birthday_sms_2:
+        "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un regard de fête pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+      novelty_sms_1:
+        "{{prenom}}, nouvelles techniques et volumes à découvrir chez {{salon}} ✨ Envie d'un nouveau regard ? Votre créneau : {{lien}}",
+      seasonal_sms_1:
+        "{{prenom}}, les fêtes approchent 🎄 Réservez votre pose chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+      seasonal_sms_2:
+        "{{prenom}}, bientôt l'été ☀️ Un regard parfait sans mascara pour les vacances ? Votre créneau : {{lien}} — {{salon}}",
+    },
+  },
+  {
+    id: "autre",
+    label: "Autre (beauté & bien-être)",
+    services: [
+      { name: "Prestation signature", priceCents: 6000, defaultIntervalDays: 35 },
+      { name: "Séance découverte", priceCents: 4000, defaultIntervalDays: 28 },
+      { name: "Forfait bien-être", priceCents: 9000, defaultIntervalDays: 42 },
+      { name: "Retouche / séance courte", priceCents: 3000, defaultIntervalDays: 21 },
+    ],
+    // Aucun override : la base neutre convient (spa, massage, tatouage…).
+    overrides: {},
+  },
+];
+
+const METIER_BY_ID = new Map(METIERS.map((m) => [m.id, m]));
+
+/** Métier valide, ou « autre » par défaut. */
+export function normalizeMetier(value: string | null | undefined): MetierId {
+  return value && METIER_BY_ID.has(value as MetierId)
+    ? (value as MetierId)
+    : "autre";
+}
+
+/** Prestations de départ pour un métier. */
+export function servicesForMetier(metier: string | null | undefined): MetierService[] {
+  return METIER_BY_ID.get(normalizeMetier(metier))!.services;
+}
+
+/** Modèles de départ pour un métier : base neutre + overrides du métier. */
+export function templatesForMetier(metier: string | null | undefined): TemplateSeed[] {
+  const overrides = METIER_BY_ID.get(normalizeMetier(metier))!.overrides;
+  return DEFAULT_TEMPLATES.map((t) => {
+    const o = overrides[t.key];
+    if (!o) return t;
+    const ov = typeof o === "string" ? { body: o, subject: undefined } : o;
+    return {
+      ...t,
+      body: ov.body,
+      subject: ov.subject !== undefined ? ov.subject : t.subject,
+    };
+  });
+}
+
+/** Options pour le sélecteur de métier (inscription). */
+export const METIER_OPTIONS = METIERS.map((m) => ({ id: m.id, label: m.label }));

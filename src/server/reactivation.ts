@@ -70,7 +70,7 @@ export async function updateTemplate(
 
 export async function setupReactivation(): Promise<void> {
   const member = await requireMember();
-  await seedReactivationDefaults(member.salonId);
+  await seedReactivationDefaults(member.salonId, member.salon.metier);
   revalidatePath("/relances");
 }
 

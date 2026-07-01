@@ -1,16 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_TEMPLATES, DEFAULT_CAMPAIGNS } from "@/lib/templates";
+import { DEFAULT_CAMPAIGNS } from "@/lib/templates";
+import { templatesForMetier } from "@/lib/metiers";
 
 /**
- * Met en place les modèles de messages et les campagnes par défaut d'un salon.
- * Idempotent : ne fait rien si des campagnes existent déjà.
+ * Met en place les modèles de messages et les campagnes par défaut d'un salon,
+ * adaptés à son métier. Idempotent : ne fait rien si des campagnes existent déjà.
  */
-export async function seedReactivationDefaults(salonId: string): Promise<void> {
+export async function seedReactivationDefaults(
+  salonId: string,
+  metier?: string | null,
+): Promise<void> {
   const existing = await prisma.campaign.count({ where: { salonId } });
   if (existing > 0) return;
 
   const keyToId = new Map<string, string>();
-  for (const t of DEFAULT_TEMPLATES) {
+  for (const t of templatesForMetier(metier)) {
     const created = await prisma.messageTemplate.create({
       data: {
         salonId,

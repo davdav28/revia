@@ -17,6 +17,8 @@ export const signupSchema = z.object({
     .string()
     .min(8, "Le mot de passe doit faire au moins 8 caractères.")
     .max(72, "Le mot de passe est trop long."),
+  // Métier (beauté & bien-être). Normalisé côté serveur ; « autre » par défaut.
+  metier: z.string().trim().max(40).optional().or(z.literal("")),
 });
 
 export const loginSchema = z.object({

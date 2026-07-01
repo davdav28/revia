@@ -58,7 +58,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "cycle",
     subject: null,
-    body: "{{prenom}}, vos ongles arrivent en fin de tenue ✨ C'est le moment idéal pour un remplissage. Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
+    body: "{{prenom}}, il est bientôt temps de reprendre rendez-vous ✨ Je vous garde un créneau cette semaine ? {{lien}} — {{salon}}",
   },
   {
     key: "cycle_sms_2",
@@ -67,7 +67,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "cycle",
     subject: null,
-    body: "{{prenom}}, déjà {{semaines}} semaines depuis votre pose 💅 Vos ongles réclament sûrement un petit raccord. On vous trouve un moment ? {{lien}}",
+    body: "{{prenom}}, déjà {{semaines}} semaines depuis votre dernière visite 😊 On vous trouve un moment pour un nouveau rendez-vous ? {{lien}}",
   },
   // B — Dormante douce (4 à 6 semaines, sans offre)
   {
@@ -86,7 +86,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "soft",
     subject: null,
-    body: "{{prenom}}, vos ongles nous manquent 😊 Si l'envie de repasser vous prend, on vous garde une place avec plaisir : {{lien}} — {{salon}}",
+    body: "{{prenom}}, vous nous manquez chez {{salon}} 😊 Si l'envie de repasser vous prend, on vous garde une place avec plaisir : {{lien}}",
   },
   // E — Dormante longue (8 semaines et +)
   {
@@ -115,7 +115,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "post_first_visit",
     scenario: "firstvisit",
     subject: null,
-    body: "{{prenom}}, j'espère que votre première pose chez {{salon}} vous a plu 💕 Pour garder de belles mains, c'est le bon moment pour le prochain rdv. {{lien}}",
+    body: "{{prenom}}, j'espère que votre première visite chez {{salon}} vous a plu 💕 C'est le bon moment pour reprendre rendez-vous. {{lien}}",
   },
   {
     key: "firstvisit_sms_2",
@@ -143,7 +143,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "birthday",
     scenario: "birthday",
     subject: null,
-    body: "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous des ongles parfaits pour l'occasion, on s'occupe du reste. {{lien}} — {{salon}}",
+    body: "{{prenom}}, c'est bientôt votre jour 🎂 Offrez-vous un moment rien que pour vous, on s'occupe du reste. {{lien}} — {{salon}}",
   },
   // J — Emails (format long)
   {
@@ -152,8 +152,8 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     channel: "email",
     trigger: "dormancy",
     scenario: "soft",
-    subject: "{{prenom}}, vos ongles nous manquent 💅",
-    body: "Bonjour {{prenom}},\n\nÇa fait {{semaines}} semaines qu'on ne vous a pas vue chez {{salon}}, et on s'est dit qu'un petit mot s'imposait.\n\nPas de grand discours : juste l'envie de vous retrouver et de prendre soin de vos mains comme la dernière fois.\n\nQuand vous voulez, votre créneau vous attend — il suffit d'un clic.\n\nÀ très vite,\nL'équipe {{salon}}",
+    subject: "{{prenom}}, vous nous manquez 💫",
+    body: "Bonjour {{prenom}},\n\nÇa fait {{semaines}} semaines qu'on ne vous a pas vu(e) chez {{salon}}, et on s'est dit qu'un petit mot s'imposait.\n\nPas de grand discours : juste l'envie de vous retrouver et de prendre soin de vous comme la dernière fois.\n\nQuand vous voulez, votre créneau vous attend — il suffit d'un clic.\n\nÀ très vite,\nL'équipe {{salon}}",
   },
   {
     key: "long_email_1",
@@ -162,7 +162,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: "dormancy",
     scenario: "long",
     subject: "{{prenom}}, la porte vous reste grande ouverte",
-    body: "Bonjour {{prenom}},\n\nCela fait un moment qu'on ne vous a pas accueillie chez {{salon}}. On ne voulait pas vous oublier.\n\nSi l'envie de repasser vous prend, on serait vraiment ravies de vous revoir et de chouchouter vos mains.\n\nVotre créneau vous attend, en un clic.\n\nÀ bientôt peut-être,\nL'équipe {{salon}}",
+    body: "Bonjour {{prenom}},\n\nCela fait un moment qu'on ne vous a pas accueilli(e) chez {{salon}}. On ne voulait pas vous oublier.\n\nSi l'envie de repasser vous prend, on serait vraiment ravis de vous revoir et de vous chouchouter.\n\nVotre créneau vous attend, en un clic.\n\nÀ bientôt peut-être,\nL'équipe {{salon}}",
   },
   // C — Une raison de revenir / nouveauté (envoi manuel)
   {
@@ -172,7 +172,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "novelty",
     subject: null,
-    body: "{{prenom}}, on vient de rentrer les nouvelles teintes de la saison chez {{salon}} 💅 Envie d'en tester une ? Votre créneau vous attend : {{lien}}",
+    body: "{{prenom}}, on a des nouveautés à vous faire découvrir chez {{salon}} ✨ Envie d'en profiter ? Votre créneau vous attend : {{lien}}",
   },
   {
     key: "novelty_sms_2",
@@ -181,7 +181,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "novelty",
     subject: null,
-    body: "{{prenom}}, nouveau chez {{salon}} : {{derniere_presta}} et déco sur-mesure. Ça vous tente pour la prochaine pose ? {{lien}}",
+    body: "{{prenom}}, nouveau chez {{salon}} : {{derniere_presta}}. Ça vous tente pour un prochain rendez-vous ? {{lien}}",
   },
   {
     key: "novelty_email_1",
@@ -189,8 +189,8 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     channel: "email",
     trigger: null,
     scenario: "novelty",
-    subject: "{{prenom}}, les nouvelles couleurs sont arrivées 🎨",
-    body: "Bonjour {{prenom}},\n\nOn vient de rentrer les teintes de la saison chez {{salon}} — et franchement, il y en a quelques-unes qui vous iraient à merveille.\n\nEnvie de vous faire plaisir et de tester une nouveauté sur votre prochaine pose ?\n\nOn a hâte de vous revoir,\nL'équipe {{salon}}",
+    subject: "{{prenom}}, on a des nouveautés pour vous ✨",
+    body: "Bonjour {{prenom}},\n\nOn a quelques nouveautés à vous faire découvrir chez {{salon}} — et franchement, on pense qu'elles vous plairont.\n\nEnvie de vous faire plaisir et de tester quelque chose de nouveau à votre prochain rendez-vous ?\n\nOn a hâte de vous revoir,\nL'équipe {{salon}}",
   },
   // D — Créneau qui se libère (envoi manuel, heures creuses)
   {
@@ -219,7 +219,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "seasonal",
     subject: null,
-    body: "{{prenom}}, les fêtes approchent 🎄 Réservez vos ongles de fête chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
+    body: "{{prenom}}, les fêtes approchent 🎄 Réservez votre rendez-vous chez {{salon}} avant que l'agenda se remplisse : {{lien}}",
   },
   {
     key: "seasonal_sms_2",
@@ -228,7 +228,7 @@ export const DEFAULT_TEMPLATES: TemplateSeed[] = [
     trigger: null,
     scenario: "seasonal",
     subject: null,
-    body: "{{prenom}}, bientôt l'été ☀️ On vous prépare des ongles parfaits pour les sandales ? Votre créneau : {{lien}} — {{salon}}",
+    body: "{{prenom}}, bientôt l'été ☀️ On vous prépare un moment beauté avant les vacances ? Votre créneau : {{lien}} — {{salon}}",
   },
   // I — Win-back avec offre (à utiliser RAREMENT)
   {

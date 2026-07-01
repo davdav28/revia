@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { salonLimitFor } from "@/lib/team";
-import { DEFAULT_SERVICES } from "@/lib/default-services";
+import { normalizeMetier, servicesForMetier } from "@/lib/metiers";
 import { seedReactivationDefaults } from "@/lib/reactivation/seed";
 import { generateUniqueSlug } from "@/lib/slug";
 
@@ -34,12 +34,15 @@ export async function setActiveSalon(
 /** Crée un nouveau salon rattaché au compte (dans la limite du plan). */
 export async function createSalon(
   name: string,
+  metier?: string,
 ): Promise<{ error?: string } | { ok: true; salonId: string }> {
   const member = await requireMember();
   const parsed = nameSchema.safeParse(name);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Nom invalide." };
   }
+  // À défaut, le nouveau salon hérite du métier du salon courant.
+  const salonMetier = normalizeMetier(metier ?? member.salon.metier);
 
   const limit = salonLimitFor(member.salon);
   if (limit !== null && member.salons.length >= limit) {
@@ -53,11 +56,12 @@ export async function createSalon(
     data: {
       name: parsed.data,
       slug,
-      services: { create: DEFAULT_SERVICES },
+      metier: salonMetier,
+      services: { create: servicesForMetier(salonMetier) },
     },
     select: { id: true },
   });
-  await seedReactivationDefaults(salon.id);
+  await seedReactivationDefaults(salon.id, salonMetier);
   await prisma.membership.create({
     data: { userId: member.id, salonId: salon.id, role: "owner" },
   });

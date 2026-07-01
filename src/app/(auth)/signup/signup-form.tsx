@@ -6,6 +6,7 @@ import { signupAction, type AuthState } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { METIER_OPTIONS } from "@/lib/metiers";
 
 const initial: AuthState = {};
 
@@ -48,6 +49,25 @@ export function SignupForm() {
             {state.fieldErrors.salonName[0]}
           </p>
         ) : null}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="metier">Votre métier</Label>
+        <select
+          id="metier"
+          name="metier"
+          defaultValue="onglerie"
+          className="border-line bg-surface text-ink focus-visible:ring-lacquer/40 h-11 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
+        >
+          {METIER_OPTIONS.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-muted text-xs">
+          On pré-remplit vos prestations et vos modèles de messages en fonction.
+        </p>
       </div>
 
       <div className="space-y-1.5">
