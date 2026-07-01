@@ -136,8 +136,10 @@ export function SubscribeButtons({
                     <Check className="size-4" />
                     Plan actuel
                   </>
+                ) : !isActive ? (
+                  `Démarrer l'essai de ${SUBSCRIPTION.trial.days} j`
                 ) : (
-                  "Choisir"
+                  "Choisir cette formule"
                 )}
               </Button>
             </div>
