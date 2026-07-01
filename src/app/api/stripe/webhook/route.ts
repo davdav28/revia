@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { notifySalon } from "@/lib/notifications";
+import { enforceOneTrialPerCard } from "@/lib/trial-abuse";
 
 export const dynamic = "force-dynamic";
 
@@ -112,15 +113,22 @@ export async function POST(req: NextRequest) {
         if (salonId && session.subscription) {
           const sub = await stripe.subscriptions.retrieve(
             String(session.subscription),
+            { expand: ["default_payment_method"] },
           );
           await applySubscription(sub);
           await resetQuota({ id: salonId }, periodEndOf(sub));
+          // Anti-abus : un essai gratuit par carte. Coupe l'essai si réutilisée.
+          const trialCut = await enforceOneTrialPerCard(
+            stripe,
+            sub,
+            salonId,
+          ).catch(() => false);
+          const onTrial = sub.status === "trialing" && !trialCut;
           await notifySalon(salonId, {
             type: "billing",
-            title:
-              sub.status === "trialing"
-                ? "Votre essai Revia a démarré 🎉"
-                : "Votre abonnement Revia est actif 🎉",
+            title: onTrial
+              ? "Votre essai Revia a démarré 🎉"
+              : "Votre abonnement Revia est actif 🎉",
             body: "Vos relances sont activées. Bienvenue !",
             url: "/reglages/abonnement",
           }).catch(() => {});

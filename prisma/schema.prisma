@@ -162,6 +162,17 @@ model User {
   @@index([salonId])
 }
 
+/// Anti-abus d'essai : une empreinte de carte = un seul essai gratuit.
+/// L'empreinte (fingerprint) est stable pour une même carte physique, même
+/// entre clients Stripe différents. Sert à couper l'essai d'une carte réutilisée.
+model TrialCard {
+  fingerprint String   @id
+  salonId     String
+  createdAt   DateTime @default(now())
+
+  @@index([salonId])
+}
+
 /// Notification in-app d'un salon (nouvelle réservation, CA récupéré, quota…).
 model Notification {
   id        String    @id @default(cuid())
