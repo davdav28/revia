@@ -257,16 +257,27 @@ export async function runScanForSalon(
     if (recipients.length === 0) continue;
     const cooldownMs = campaign.cooldownDays * DAY;
 
-    // Nombre de relances déjà envoyées par cette campagne (rotation + sommeil).
-    const priorCounts = await prisma.message.groupBy({
-      by: ["clientId"],
+    // Relances déjà envoyées par cette campagne, mais seulement pour l'épisode
+    // de dormance EN COURS (depuis la dernière visite). Ainsi le plafond de 3
+    // relances se réarme dès qu'un client revient : un client fidèle qui répond
+    // n'est jamais « épuisé » à vie.
+    const priorMsgs = await prisma.message.findMany({
       where: {
         campaignId: campaign.id,
         clientId: { in: recipients.map((r) => r.id) },
       },
-      _count: true,
+      select: { clientId: true, createdAt: true },
     });
-    const attempts = new Map(priorCounts.map((p) => [p.clientId, p._count]));
+    const lastVisitById = new Map(
+      recipients.map((r) => [r.id, r.lastVisitAt]),
+    );
+    const attempts = new Map<string, number>();
+    for (const m of priorMsgs) {
+      const lastVisit = lastVisitById.get(m.clientId);
+      // Relance d'un épisode précédent (avant la dernière visite) → on l'ignore.
+      if (lastVisit && m.createdAt <= lastVisit) continue;
+      attempts.set(m.clientId, (attempts.get(m.clientId) ?? 0) + 1);
+    }
 
     for (const client of recipients) {
       if (client.optedOutAt) {
