@@ -336,7 +336,7 @@ model Campaign {
   trigger            CampaignTrigger
   channel            MessageChannel
   isActive           Boolean         @default(false)
-  cooldownDays       Int             @default(30) // délai mini entre deux relances d'une même cliente
+  cooldownDays       Int             @default(14) // délai mini entre deux relances d'une même cliente
   recoveryWindowDays Int             @default(30) // fenêtre pour attribuer un retour à la relance
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
