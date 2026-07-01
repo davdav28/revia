@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Users, ChevronRight } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { isStripeConfigured } from "@/lib/stripe";
 import { PageHeader } from "@/components/app/page-header";
@@ -23,6 +25,23 @@ export default async function AdminPage() {
         title="Espace fondateur"
         description="Outils internes — réservés à toi."
       />
+
+      <Link href="/admin/clients" className="block">
+        <Card className="hover:bg-nude-soft/40 transition-colors">
+          <CardContent className="flex items-center gap-4 py-5">
+            <div className="bg-nude-soft text-lacquer-ink flex size-10 items-center justify-center rounded-md">
+              <Users className="size-5" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-base">Tous mes clients</CardTitle>
+              <CardDescription>
+                Tous les salons abonnés : statut, plan, usage, CA récupéré.
+              </CardDescription>
+            </div>
+            <ChevronRight className="text-muted size-5" />
+          </CardContent>
+        </Card>
+      </Link>
 
       <Card>
         <CardHeader>
