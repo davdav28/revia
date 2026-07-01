@@ -98,12 +98,24 @@ export default async function AbonnementPage() {
           <div className="mt-4 space-y-4">
             <QuotaMeter status={quota} />
             <div className="border-line border-t pt-4">
-              <OverageCapForm currentCents={salon.overageCapCents} />
-              <p className="text-muted mt-2 text-xs">
-                Au-delà de votre forfait, chaque SMS coûte{" "}
-                {formatCentsPrecise(quota.overageCents)} ; une fois le plafond
-                atteint, les envois se mettent en pause.
-              </p>
+              {quota.isTrial ? (
+                <p className="text-muted text-xs">
+                  Pendant l'essai, vous disposez de{" "}
+                  {SUBSCRIPTION.trial.freeSegments} SMS. Une fois atteints (ou
+                  au bout de {SUBSCRIPTION.trial.days} jours), votre forfait
+                  payant prend le relais — c'est là que le plafond de
+                  dépassement entre en jeu.
+                </p>
+              ) : (
+                <>
+                  <OverageCapForm currentCents={salon.overageCapCents} />
+                  <p className="text-muted mt-2 text-xs">
+                    Au-delà de votre forfait, chaque SMS coûte{" "}
+                    {formatCentsPrecise(quota.overageCents)} ; une fois le
+                    plafond atteint, les envois se mettent en pause.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ) : null}

@@ -33,11 +33,13 @@ export function QuotaMeter({ status }: { status: QuotaStatus }) {
             ? "Plafond atteint — envois SMS en pause."
             : status.overageUsed > 0
               ? `${status.overageUsed} segment${status.overageUsed > 1 ? "s" : ""} en dépassement · ${formatCents(status.overageCostCents)}`
-              : `${status.remaining} segment${status.remaining > 1 ? "s" : ""} restant${status.remaining > 1 ? "s" : ""} dans votre forfait`}
+              : `${status.remaining} segment${status.remaining > 1 ? "s" : ""} restant${status.remaining > 1 ? "s" : ""} ${status.isTrial ? "dans votre essai" : "dans votre forfait"}`}
         </span>
-        <span>
-          Plafond de dépassement : {formatCents(status.overageCapCents)}
-        </span>
+        {status.isTrial ? null : (
+          <span>
+            Plafond de dépassement : {formatCents(status.overageCapCents)}
+          </span>
+        )}
       </div>
     </div>
   );
