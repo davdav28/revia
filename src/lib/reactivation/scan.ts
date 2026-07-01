@@ -14,7 +14,6 @@ import { bookingUrl } from "@/lib/slug";
 import { isSubscriptionActive } from "@/lib/subscription";
 import { countSegments } from "@/lib/sms-segments";
 import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
-import { getTrialStatus } from "@/lib/trial";
 import { reportOverageSegments } from "@/lib/billing-usage";
 import { SUBSCRIPTION, withStopNotice } from "@/config/brand";
 
@@ -194,19 +193,9 @@ export async function runScanForSalon(
     summary.recoveredAmountCents += amount;
   }
 
-  // Essai terminé (durée OU objectif de CA atteint) → on bloque les envois.
-  if (summary.subscriptionActive && salon.subscriptionStatus === "trial") {
-    const recAgg = await prisma.recovery.aggregate({
-      where: { salonId, recoveredAt: { gte: salon.createdAt } },
-      _sum: { recoveredAmountCents: true },
-    });
-    const trial = getTrialStatus(
-      salon,
-      recAgg._sum.recoveredAmountCents ?? 0,
-      now,
-    );
-    if (trial.expired) summary.subscriptionActive = false;
-  }
+  // Note : l'essai (30 j) est géré par Stripe. À la fin, Stripe débite et le
+  // statut passe à « active » (envois maintenus) ou « past_due » (bloqués via
+  // le webhook). Le gating ci-dessous suffit donc.
 
   // C. Envoie les relances (abonnement actif requis + plage horaire).
   if (!summary.subscriptionActive) return summary;

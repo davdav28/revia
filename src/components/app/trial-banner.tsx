@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Gift, Sparkles } from "lucide-react";
 import { formatCents } from "@/lib/money";
-import { cn } from "@/lib/utils";
 import type { TrialStatus } from "@/lib/trial";
 
 /**
@@ -39,11 +38,6 @@ export function TrialBanner({
     );
   }
 
-  const goalPct = Math.min(
-    100,
-    Math.round((trial.recoveredCents / trial.targetCents) * 100),
-  );
-
   return (
     <div className="border-lacquer/25 bg-nude-soft/60 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm">
       <span className="bg-lacquer/10 text-lacquer-ink flex size-8 shrink-0 items-center justify-center rounded-md">
@@ -55,23 +49,17 @@ export function TrialBanner({
           restant{trial.daysLeft > 1 ? "s" : ""}
         </p>
         <p className="text-muted mt-0.5">
-          Gratuit jusqu'à {formatCents(trial.targetCents)} de CA récupéré (
-          {formatCents(trial.recoveredCents)} pour l'instant) ·{" "}
+          Votre abonnement démarre automatiquement à la fin de l'essai —
+          résiliable à tout moment. ·{" "}
           <span className="text-ink">{Math.max(0, segmentsLeft)}</span> segments
-          SMS offerts restants.{" "}
+          SMS restants.{" "}
           <Link
             href="/reglages/abonnement"
             className="text-lacquer-ink font-medium hover:underline"
           >
-            Choisir une formule
+            Gérer mon abonnement
           </Link>
         </p>
-        <div className="bg-surface border-line mt-2 h-1.5 w-full overflow-hidden rounded-full border">
-          <div
-            className={cn("bg-lacquer h-full rounded-full")}
-            style={{ width: `${goalPct}%` }}
-          />
-        </div>
       </div>
     </div>
   );

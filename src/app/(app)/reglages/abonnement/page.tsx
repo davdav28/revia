@@ -17,7 +17,7 @@ import { OverageCapForm } from "@/components/app/overage-cap-form";
 import { TrialBanner } from "@/components/app/trial-banner";
 import { formatDate } from "@/lib/dates";
 import { formatCentsPrecise } from "@/lib/money";
-import { getPlan } from "@/config/brand";
+import { getPlan, SUBSCRIPTION } from "@/config/brand";
 import { getQuotaStatus } from "@/lib/quota";
 import { getTrialStatus } from "@/lib/trial";
 
@@ -61,6 +61,19 @@ export default async function AbonnementPage() {
           Mode démonstration : le paiement est simulé (aucune carte requise).
           Ajoutez vos clés Stripe pour facturer pour de vrai.
         </p>
+      ) : null}
+
+      {salon.subscriptionStatus === "incomplete" ? (
+        <div className="border-lacquer/30 bg-nude-soft/60 rounded-lg border px-4 py-3 text-sm">
+          <p className="text-ink font-semibold">
+            Démarrez votre essai gratuit de {SUBSCRIPTION.trial.days} jours
+          </p>
+          <p className="text-muted mt-0.5">
+            Choisissez une formule et ajoutez votre carte ci-dessous. Vous
+            n'êtes <strong>pas débité pendant {SUBSCRIPTION.trial.days} jours</strong>,
+            et vous pouvez résilier à tout moment.
+          </p>
+        </div>
       ) : null}
 
       <TrialBanner trial={trial} segmentsLeft={quota.remaining} />

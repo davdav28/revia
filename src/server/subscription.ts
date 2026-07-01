@@ -31,13 +31,18 @@ export async function startCheckout(
   // --- Mode démo (sans clé Stripe) : on active directement. ---
   if (!stripe) {
     const periodDays = period === "annual" ? 365 : 30;
+    // Compte neuf → on simule l'essai ; sinon activation directe.
+    const fresh = member.salon.subscriptionStatus === "incomplete";
     await prisma.salon.update({
       where: { id: member.salonId },
       data: {
-        subscriptionStatus: "active",
+        subscriptionStatus: fresh ? "trial" : "active",
         plan: plan.id,
         billingPeriod: period,
-        currentPeriodEnd: new Date(Date.now() + periodDays * DAY),
+        currentPeriodEnd: new Date(
+          Date.now() +
+            (fresh ? SUBSCRIPTION.trial.days : periodDays) * DAY,
+        ),
         // Quota neuf pour la nouvelle période.
         smsUsedThisPeriod: 0,
         quotaPeriodStart: new Date(),
@@ -88,6 +93,10 @@ export async function startCheckout(
     metadata: { salonId: member.salonId, plan: plan.id, period },
     subscription_data: {
       metadata: { salonId: member.salonId, plan: plan.id, period },
+      // Premier abonnement (compte neuf) → essai de 30 jours avant tout débit.
+      ...(member.salon.subscriptionStatus === "incomplete"
+        ? { trial_period_days: SUBSCRIPTION.trial.days }
+        : {}),
     },
     ...(founderCoupon ? { discounts: [{ coupon: founderCoupon }] } : {}),
   });

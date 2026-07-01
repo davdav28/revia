@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Upload, Users, TrendingUp } from "lucide-react";
-import { BRAND, getPlan, HIGHLIGHTED_PLAN_ID } from "@/config/brand";
+import { BRAND, SUBSCRIPTION, getPlan, HIGHLIGHTED_PLAN_ID } from "@/config/brand";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app/page-header";
@@ -102,11 +102,27 @@ export default async function DashboardPage() {
     trialRecoveredCents = agg._sum.recoveredAmountCents ?? 0;
   }
   const trial = getTrialStatus(member.salon, trialRecoveredCents, now);
-  const billingBanner = trial.isTrial ? (
-    <TrialBanner trial={trial} segmentsLeft={quotaStatus.remaining} />
-  ) : (
-    <QuotaBanner status={quotaStatus} />
-  );
+  const billingBanner =
+    member.salon.subscriptionStatus === "incomplete" ? (
+      <div className="border-lacquer/30 bg-nude-soft/60 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm">
+        <div>
+          <p className="text-ink font-medium">
+            Démarrez votre essai gratuit de {SUBSCRIPTION.trial.days} jours
+          </p>
+          <p className="text-muted mt-0.5">
+            Ajoutez votre carte pour activer vos relances. Aucun débit avant{" "}
+            {SUBSCRIPTION.trial.days} jours, résiliable à tout moment.
+          </p>
+        </div>
+        <Button size="sm" asChild>
+          <Link href="/reglages/abonnement">Ajouter ma carte</Link>
+        </Button>
+      </div>
+    ) : trial.isTrial ? (
+      <TrialBanner trial={trial} segmentsLeft={quotaStatus.remaining} />
+    ) : (
+      <QuotaBanner status={quotaStatus} />
+    );
 
   // Onboarding : checklist « Premiers pas » tant que la mise en route n'est pas
   // terminée (clientes importées → relance activée → adresse renseignée).

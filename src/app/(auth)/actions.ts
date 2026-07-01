@@ -68,6 +68,8 @@ export async function signupAction(
         data: {
           name: salonName,
           slug,
+          // Carte requise à l'inscription : l'essai démarre au paiement (Stripe).
+          subscriptionStatus: "incomplete",
           // Catalogue de prestations onglerie pré-rempli.
           services: { create: DEFAULT_SERVICES },
         },
@@ -97,7 +99,7 @@ export async function signupAction(
     if (!data.session) {
       return {
         message:
-          "Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous.",
+          "Compte créé. Vérifiez votre email pour confirmer, puis connectez-vous pour démarrer votre essai.",
       };
     }
   } catch (err) {
@@ -107,7 +109,8 @@ export async function signupAction(
     return { error: "Une erreur est survenue. Réessayez." };
   }
 
-  redirect("/dashboard");
+  // Carte à l'inscription : on envoie choisir une formule + saisir la carte.
+  redirect("/reglages/abonnement");
 }
 
 export async function loginAction(
