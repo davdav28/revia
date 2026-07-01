@@ -115,6 +115,7 @@ model Salon {
   messages     Message[]
   recoveries   Recovery[]
   suggestions  Suggestion[]
+  notifications Notification[]
 }
 
 /// Invitation d'un coéquipier à rejoindre un salon. Acceptée via /rejoindre/<token>.
@@ -156,8 +157,43 @@ model User {
   salonId String
 
   memberships Membership[]
+  pushSubscriptions PushSubscription[]
 
   @@index([salonId])
+}
+
+/// Notification in-app d'un salon (nouvelle réservation, CA récupéré, quota…).
+model Notification {
+  id        String    @id @default(cuid())
+  type      String // booking | recovery | quota | billing
+  title     String
+  body      String
+  url       String? // lien profond dans l'app
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  salon   Salon  @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  salonId String
+
+  @@index([salonId])
+  @@index([salonId, readAt])
+  @@index([salonId, createdAt])
+}
+
+/// Abonnement Web Push d'un appareil (par utilisateur). Reçoit les notifications
+/// système des salons auxquels l'utilisateur a accès.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@index([userId])
 }
 
 /// Accès d'un utilisateur à un salon, avec son rôle dans ce salon.

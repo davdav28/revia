@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BookingLinkCard } from "@/components/app/booking-link-card";
 import { SalonContactForm } from "@/components/app/salon-contact-form";
+import { PushToggle } from "@/components/app/push-toggle";
 import { DeleteAccountButton } from "@/components/app/delete-account-button";
 import { bookingUrl } from "@/lib/slug";
 import { SUBSCRIPTION_STATUS_LABEL } from "@/lib/subscription";
@@ -169,6 +170,19 @@ export default async function ReglagesPage() {
               </Badge>
             }
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+          <CardDescription>
+            Soyez prévenu sur cet appareil dès qu'un client réserve, revient ou
+            que votre quota approche.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <PushToggle />
         </CardContent>
       </Card>
 

@@ -2,8 +2,21 @@ import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { notifySalon } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
+
+/** Retrouve le salon rattaché à un client Stripe. */
+async function salonIdForCustomer(
+  customerId: string | null | undefined,
+): Promise<string | null> {
+  if (!customerId) return null;
+  const s = await prisma.salon.findFirst({
+    where: { stripeCustomerId: String(customerId) },
+    select: { id: true },
+  });
+  return s?.id ?? null;
+}
 
 /** Traduit le statut d'abonnement Stripe vers le nôtre. */
 function mapStatus(s: string): string {
@@ -102,6 +115,15 @@ export async function POST(req: NextRequest) {
           );
           await applySubscription(sub);
           await resetQuota({ id: salonId }, periodEndOf(sub));
+          await notifySalon(salonId, {
+            type: "billing",
+            title:
+              sub.status === "trialing"
+                ? "Votre essai Revia a démarré 🎉"
+                : "Votre abonnement Revia est actif 🎉",
+            body: "Vos relances sont activées. Bienvenue !",
+            url: "/reglages/abonnement",
+          }).catch(() => {});
         }
         break;
       }
@@ -109,9 +131,38 @@ export async function POST(req: NextRequest) {
       // Changement de plan / renouvellement / résiliation.
       case "customer.subscription.created":
       case "customer.subscription.updated":
-      case "customer.subscription.deleted":
         await applySubscription(event.data.object as Stripe.Subscription);
         break;
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        await applySubscription(sub);
+        const sid = sub.metadata?.salonId ?? (await salonIdForCustomer(sub.customer as string));
+        if (sid) {
+          await notifySalon(sid, {
+            type: "billing",
+            title: "Abonnement résilié",
+            body: "Vos relances sont en pause. Vous pouvez réactiver quand vous voulez.",
+            url: "/reglages/abonnement",
+          }).catch(() => {});
+        }
+        break;
+      }
+
+      // Échec de paiement → on prévient pour éviter la coupure.
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const sid = await salonIdForCustomer(invoice.customer as string);
+        if (sid) {
+          await notifySalon(sid, {
+            type: "billing",
+            title: "Paiement échoué",
+            body: "Mettez à jour votre moyen de paiement pour continuer vos relances.",
+            url: "/reglages/abonnement",
+          }).catch(() => {});
+        }
+        break;
+      }
 
       // Facture payée = nouvelle période → remise à zéro du quota.
       case "invoice.paid":

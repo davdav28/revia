@@ -8,6 +8,7 @@ import { normalizePhone } from "@/lib/phone";
 import { parseFlexibleDate } from "@/lib/dates";
 import { isSlotBookable, HORIZON_DAYS, type BusyInterval } from "@/lib/booking";
 import { getMessagingProvider } from "@/lib/messaging";
+import { notifySalon } from "@/lib/notifications";
 
 const DAY = 86_400_000;
 
@@ -172,6 +173,15 @@ export async function createPublicBooking(
     minute: "2-digit",
     timeZone: salon.timezone,
   }).format(startAt);
+
+  // Notification au salon : nouvelle réservation en ligne.
+  const clientName = `${d.firstName}${d.lastName ? " " + d.lastName : ""}`;
+  await notifySalon(salon.id, {
+    type: "booking",
+    title: "Nouvelle réservation en ligne",
+    body: `${clientName} — ${service.name}, ${dateLabel}.`,
+    url: "/agenda",
+  }).catch(() => {});
 
   // Confirmation à la cliente (best-effort : n'empêche jamais la réservation).
   try {

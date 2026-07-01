@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
 import { NAV_ITEMS, SECONDARY_NAV, type NavItem } from "./nav";
 import { SalonSwitcher } from "./salon-switcher";
+import { NotificationBell } from "./notification-bell";
 import { logoutAction } from "@/app/(auth)/actions";
 import type { AccessibleSalon } from "@/lib/auth";
 
@@ -140,6 +141,8 @@ export function AppShell({
               canAddSalon={canAddSalon}
             />
           </div>
+
+          <NotificationBell />
 
           <span className="text-muted hidden text-sm sm:inline">
             {userLabel}

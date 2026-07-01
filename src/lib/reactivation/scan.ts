@@ -16,6 +16,8 @@ import { countSegments } from "@/lib/sms-segments";
 import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
 import { reportOverageSegments, endTrialNow } from "@/lib/billing-usage";
 import { SUBSCRIPTION, withStopNotice } from "@/config/brand";
+import { notifySalon } from "@/lib/notifications";
+import { formatCents } from "@/lib/money";
 
 const DAY = 86_400_000;
 const MAX_PER_CAMPAIGN = 200;
@@ -155,6 +157,8 @@ export async function runScanForSalon(
     },
     include: { campaign: { select: { recoveryWindowDays: true } } },
   });
+  const recovBefore = summary.recoveriesCreated;
+  const amountBefore = summary.recoveredAmountCents;
   for (const msg of pending) {
     if (!msg.sentAt) continue;
     const windowDays = msg.campaign?.recoveryWindowDays ?? 30;
@@ -191,6 +195,21 @@ export async function runScanForSalon(
     });
     summary.recoveriesCreated++;
     summary.recoveredAmountCents += amount;
+  }
+
+  // Notification « victoire » : un ou plusieurs clients récupérés.
+  const recoveredNow = summary.recoveriesCreated - recovBefore;
+  if (recoveredNow > 0) {
+    const gained = summary.recoveredAmountCents - amountBefore;
+    await notifySalon(salonId, {
+      type: "recovery",
+      title:
+        recoveredNow > 1
+          ? `${recoveredNow} clients récupérés 🎉`
+          : "Un client récupéré 🎉",
+      body: `Grâce à vos relances, +${formatCents(gained)} de chiffre d'affaires.`,
+      url: "/dashboard",
+    }).catch(() => {});
   }
 
   // Note : l'essai (30 j) est géré par Stripe. À la fin, Stripe débite et le
@@ -410,6 +429,12 @@ export async function runScanForSalon(
               quota.included,
               provider,
             ).catch(() => {});
+            await notifySalon(salonId, {
+              type: "quota",
+              title: "Quota SMS bientôt atteint",
+              body: `Vous avez utilisé ${SUBSCRIPTION.quotaAlertPct} % de vos SMS ce mois-ci. Pensez à recharger si besoin.`,
+              url: "/reglages/abonnement",
+            }).catch(() => {});
           }
         }
         await prisma.client.update({
