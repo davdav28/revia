@@ -5,6 +5,7 @@ import { getPlan, HIGHLIGHTED_PLAN_ID, SUBSCRIPTION, type Plan } from "@/config/
 export type QuotaSalon = Pick<
   Salon,
   | "plan"
+  | "subscriptionStatus"
   | "smsUsedThisPeriod"
   | "rechargeSegments"
   | "overageCapCents"
@@ -42,14 +43,17 @@ export type QuotaStatus = {
 export function getQuotaStatus(salon: QuotaSalon): QuotaStatus {
   const plan = getPlan(salon.plan);
 
-  // Sans plan = essai : segments offerts, aucun dépassement possible.
-  if (!plan) {
+  // Pendant l'essai (ou sans plan) : 150 segments offerts, aucun dépassement.
+  // Même si une formule est choisie (carte à l'inscription), l'essai reste
+  // plafonné à 150 SMS ; au-delà, l'essai se termine et le plan prend le relais.
+  const onTrial = !plan || salon.subscriptionStatus === "trial";
+  if (onTrial) {
     const included =
       SUBSCRIPTION.trial.freeSegments + (salon.rechargeSegments ?? 0);
     const used = salon.smsUsedThisPeriod ?? 0;
     const pct = included > 0 ? Math.round((used / included) * 100) : 0;
     return {
-      plan: getPlan(HIGHLIGHTED_PLAN_ID)!,
+      plan: plan ?? getPlan(HIGHLIGHTED_PLAN_ID)!,
       included,
       used,
       remaining: Math.max(0, included - used),

@@ -31,3 +31,22 @@ export async function reportOverageSegments(
     // Best-effort : un échec de report ne doit jamais bloquer l'envoi.
   }
 }
+
+/**
+ * Termine l'essai immédiatement (le salon a épuisé ses 150 SMS d'essai) :
+ * Stripe facture et démarre la période payante. Best-effort ; no-op sans Stripe.
+ */
+export async function endTrialNow(
+  stripeSubscriptionId: string | null | undefined,
+): Promise<void> {
+  if (!stripeSubscriptionId) return;
+  const stripe = getStripe();
+  if (!stripe) return;
+  try {
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      trial_end: "now",
+    });
+  } catch {
+    // Best-effort : le webhook synchronisera de toute façon le statut.
+  }
+}

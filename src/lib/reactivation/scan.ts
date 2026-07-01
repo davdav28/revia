@@ -14,7 +14,7 @@ import { bookingUrl } from "@/lib/slug";
 import { isSubscriptionActive } from "@/lib/subscription";
 import { countSegments } from "@/lib/sms-segments";
 import { getQuotaStatus, isQuotaPeriodElapsed } from "@/lib/quota";
-import { reportOverageSegments } from "@/lib/billing-usage";
+import { reportOverageSegments, endTrialNow } from "@/lib/billing-usage";
 import { SUBSCRIPTION, withStopNotice } from "@/config/brand";
 
 const DAY = 86_400_000;
@@ -380,6 +380,16 @@ export async function runScanForSalon(
           const usedBefore = quotaUsed;
           quotaUsed += segments;
           summary.smsSegmentsUsed += segments;
+          // Essai : à 150 segments atteints, on termine l'essai (Stripe facture,
+          // le plan payant prend le relais dès le prochain scan).
+          const trialCap = SUBSCRIPTION.trial.freeSegments;
+          if (
+            salon.subscriptionStatus === "trial" &&
+            usedBefore < trialCap &&
+            quotaUsed >= trialCap
+          ) {
+            await endTrialNow(salon.stripeSubscriptionId).catch(() => {});
+          }
           // Segments tombant en dépassement → reportés à Stripe (metered).
           const overageDelta =
             Math.max(0, quotaUsed - quota.included) -
