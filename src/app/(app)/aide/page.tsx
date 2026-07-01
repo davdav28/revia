@@ -18,20 +18,20 @@ const SUPPORT_EMAIL = LEGAL.contactEmail;
 // FAQ — éditable ici, enrichissez-la au fil du temps.
 const FAQ: { q: string; a: string }[] = [
   {
-    q: "Comment importer mon fichier clientes ?",
-    a: "Allez dans Clientes → Importer, puis choisissez un fichier CSV (prénom, nom, téléphone, email, dernière visite). Vous associez vos colonnes, vérifiez l'aperçu, et c'est importé.",
+    q: "Comment importer mon fichier clients ?",
+    a: "Allez dans Clients → Importer, puis choisissez un fichier CSV (prénom, nom, téléphone, email, dernière visite). Vous associez vos colonnes, vérifiez l'aperçu, et c'est importé.",
   },
   {
-    q: "Comment Revia repère-t-il les clientes à relancer ?",
-    a: "Chaque cliente a un cycle de retour attendu (selon sa prestation habituelle). Quand elle dépasse ce cycle, elle passe « à surveiller » puis « à relancer ». Le cycle se règle dans Réglages → Prestations.",
+    q: "Comment Revia repère-t-il les clients à relancer ?",
+    a: "Chaque client a un cycle de retour attendu (selon sa prestation habituelle). Quand il dépasse ce cycle, il passe « à surveiller » puis « à relancer ». Le cycle se règle dans Réglages → Prestations.",
   },
   {
     q: "Comment activer les relances automatiques ?",
-    a: "Dans Relances, activez une campagne (par ex. « Relance des dormantes »). Le scan quotidien envoie alors le bon message aux bonnes clientes, en respectant les horaires décents et leur consentement.",
+    a: "Dans Relances, activez une campagne (par ex. « Relance des dormantes »). Le scan quotidien envoie alors le bon message aux bons clients, en respectant les horaires décents et leur consentement.",
   },
   {
-    q: "Une cliente peut-elle se désabonner ?",
-    a: "Oui. Chaque message permet le désabonnement, et vous pouvez aussi marquer « Ne plus contacter » sur sa fiche. Une cliente désabonnée n'est plus jamais contactée.",
+    q: "Un client peut-il se désabonner ?",
+    a: "Oui. Chaque message permet le désabonnement, et vous pouvez aussi marquer « Ne plus contacter » sur sa fiche. Un client désabonné n'est plus jamais contacté.",
   },
   {
     q: "Les messages partent-ils vraiment ?",

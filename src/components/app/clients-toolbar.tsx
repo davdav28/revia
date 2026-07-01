@@ -92,9 +92,9 @@ export function ClientsToolbar() {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Rechercher une cliente (nom, téléphone, email)…"
+          placeholder="Rechercher un client (nom, téléphone, email)…"
           className="pl-9"
-          aria-label="Rechercher une cliente"
+          aria-label="Rechercher un client"
         />
       </div>
 

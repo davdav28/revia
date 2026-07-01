@@ -32,14 +32,14 @@ export default async function PerformancesPage() {
 
       <PageHeader
         title="Performance des messages"
-        description="Revia fait tourner les variantes d'un même scénario et mesure laquelle ramène le plus de clientes."
+        description="Revia fait tourner les variantes d'un même scénario et mesure laquelle ramène le plus de clients."
       />
 
       {withData.length === 0 ? (
         <EmptyState
           icon={FlaskConical}
           title="Pas encore de données à comparer"
-          description="Dès que vos relances partent, vous verrez ici, variante par variante, combien de clientes chaque message a fait revenir — et laquelle gagne."
+          description="Dès que vos relances partent, vous verrez ici, variante par variante, combien de clients chaque message a fait revenir — et laquelle gagne."
         />
       ) : (
         <div className="space-y-5">
@@ -131,7 +131,7 @@ export default async function PerformancesPage() {
           ))}
 
           <p className="text-muted text-sm">
-            Le « taux » = clientes revenues ÷ messages envoyés. Une variante est
+            Le « taux » = clients revenus ÷ messages envoyés. Une variante est
             désignée « en tête » à partir de {5} envois, quand elle devance
             nettement les autres. Gardez la gagnante, réécrivez la perdante.
           </p>

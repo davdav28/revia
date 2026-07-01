@@ -60,7 +60,7 @@ export function SalonContactForm({
           id="salon-address"
           value={a}
           onChange={(e) => setA(e.target.value)}
-          placeholder="12 rue des Ongles, 75011 Paris"
+          placeholder="12 rue de la Beauté, 75011 Paris"
         />
       </div>
       <div className="space-y-1.5">

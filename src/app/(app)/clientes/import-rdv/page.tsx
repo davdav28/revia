@@ -21,7 +21,7 @@ export default async function ImportRdvPage() {
       </Link>
       <PageHeader
         title="Importer votre historique de rendez-vous"
-        description="Depuis Planity, Treatwell, Fresha ou votre caisse. Une ligne par visite : Revia reconstitue l'historique de chaque cliente et repère aussitôt celles à relancer."
+        description="Depuis Planity, Treatwell, Fresha ou votre caisse. Une ligne par visite : Revia reconstitue l'historique de chaque client et repère aussitôt ceux à relancer."
       />
       <ApptImportWizard />
     </div>

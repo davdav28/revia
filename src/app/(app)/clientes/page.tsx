@@ -26,7 +26,7 @@ import {
   type ClientFilterParams,
 } from "@/lib/client-filters";
 
-export const metadata: Metadata = { title: "Clientes" };
+export const metadata: Metadata = { title: "Clients" };
 
 const ORDER_BY: Record<string, Prisma.ClientOrderByWithRelationInput[]> = {
   recent: [{ lastVisitAt: { sort: "desc", nulls: "last" } }],
@@ -81,11 +81,11 @@ export default async function ClientesPage({
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
-        title="Clientes"
+        title="Clients"
         description={
           totalCount > 0
-            ? `${totalCount} cliente${totalCount > 1 ? "s" : ""} dans votre fichier.`
-            : "Votre fichier clientes, et leur statut dans la boucle."
+            ? `${totalCount} client${totalCount > 1 ? "s" : ""} dans votre fichier.`
+            : "Votre fichier clients, et leur statut dans la boucle."
         }
         actions={totalCount > 0 ? actions : undefined}
       />
@@ -93,8 +93,8 @@ export default async function ClientesPage({
       {totalCount === 0 ? (
         <EmptyState
           icon={Users}
-          title="Aucune cliente pour l'instant"
-          description="Importez votre fichier clientes ou ajoutez-les une à une. Revia pourra alors repérer celles qui ne reviennent plus."
+          title="Aucun client pour l'instant"
+          description="Importez votre fichier clients ou ajoutez-les un à un. Revia pourra alors repérer ceux qui ne reviennent plus."
           action={
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild>
@@ -106,7 +106,7 @@ export default async function ClientesPage({
               <Button variant="secondary" asChild>
                 <Link href="/clientes/nouvelle">
                   <Plus className="size-4" />
-                  Ajouter une cliente
+                  Ajouter un client
                 </Link>
               </Button>
             </div>
@@ -121,7 +121,7 @@ export default async function ClientesPage({
               {filtered ? (
                 <>
                   <span className="text-ink font-semibold">{filteredCount}</span>{" "}
-                  cliente{filteredCount > 1 ? "s" : ""} dans ce segment{" "}
+                  client{filteredCount > 1 ? "s" : ""} dans ce segment{" "}
                   <span className="text-muted">
                     (sur {totalCount})
                   </span>
@@ -129,7 +129,7 @@ export default async function ClientesPage({
               ) : (
                 <>
                   <span className="text-ink font-semibold">{totalCount}</span>{" "}
-                  cliente{totalCount > 1 ? "s" : ""}
+                  client{totalCount > 1 ? "s" : ""}
                 </>
               )}
             </p>
@@ -147,14 +147,14 @@ export default async function ClientesPage({
 
           {clients.length === 0 ? (
             <div className="border-line bg-surface/60 text-muted rounded-lg border border-dashed px-6 py-12 text-center text-sm">
-              Aucune cliente ne correspond à votre recherche.
+              Aucun client ne correspond à votre recherche.
             </div>
           ) : (
             <div className="border-line bg-surface overflow-hidden rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Cliente</TableHead>
+                    <TableHead>Client</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Dernière visite</TableHead>
                     <TableHead className="hidden text-right sm:table-cell">

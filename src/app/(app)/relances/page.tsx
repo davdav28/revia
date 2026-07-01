@@ -38,7 +38,7 @@ import { withStopNotice } from "@/config/brand";
 export const metadata: Metadata = { title: "Relances" };
 
 const TRIGGER_LABEL: Record<CampaignTrigger, string> = {
-  dormancy: "Cliente dormante",
+  dormancy: "Client dormant",
   post_first_visit: "Après 1re visite",
   birthday: "Anniversaire",
   slow_slot: "Créneau creux",
@@ -233,7 +233,7 @@ export default async function RelancesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead>Client</TableHead>
                   <TableHead className="hidden sm:table-cell">Canal</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="hidden text-right sm:table-cell">

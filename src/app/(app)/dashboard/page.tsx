@@ -133,8 +133,8 @@ export default async function DashboardPage() {
     {
       key: "clients",
       done: total > 0,
-      title: "Importer vos clientes",
-      desc: "Sans elles, Revia n'a personne à relancer.",
+      title: "Importer vos clients",
+      desc: "Sans eux, Revia n'a personne à relancer.",
       href: "/clientes/import",
       cta: "Importer",
     },
@@ -181,13 +181,13 @@ export default async function DashboardPage() {
         {onboarding}
         <EmptyState
           icon={Users}
-          title="Votre tableau de bord prend vie avec vos clientes"
-          description={`Importez votre fichier clientes : ${BRAND.name} pourra repérer celles qui ne reviennent plus et calculer le chiffre d'affaires récupéré.`}
+          title="Votre tableau de bord prend vie avec vos clients"
+          description={`Importez votre fichier clients : ${BRAND.name} pourra repérer ceux qui ne reviennent plus et calculer le chiffre d'affaires récupéré.`}
           action={
             <Button asChild>
               <Link href="/clientes/import">
                 <Upload className="size-4" />
-                Importer mes clientes
+                Importer mes clients
               </Link>
             </Button>
           }
@@ -320,14 +320,14 @@ export default async function DashboardPage() {
         <p className="text-muted mt-4 max-w-2xl">
           {recoveredMonthCents > 0
             ? `Ce mois-ci, ${BRAND.name} vous a rapporté ${formatCents(recoveredMonthCents)} pour ${formatCents(refMonthlyCents)} d'abonnement — soit ${roi.toFixed(1)}× votre investissement.`
-            : `Activez vos relances : dès qu'une cliente relancée revient, son chiffre d'affaires s'affiche ici.`}
+            : `Activez vos relances : dès qu'un client relancé revient, son chiffre d'affaires s'affiche ici.`}
         </p>
       </div>
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Clientes réactivées · 30 j"
+          label="Clients réactivés · 30 j"
           value={<Num value={reactivations30} />}
         />
         <StatCard

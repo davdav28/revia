@@ -38,7 +38,7 @@ export function BookingLinkCard({
           <p className="text-ink text-sm font-medium">Réservation en ligne</p>
           <p className="text-muted mt-0.5 text-sm">
             {enabled
-              ? "Vos clientes peuvent réserver via ce lien."
+              ? "Vos clients peuvent réserver via ce lien."
               : "Désactivée — le lien renvoie une page indisponible."}
           </p>
         </div>

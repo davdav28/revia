@@ -53,7 +53,7 @@ export default async function AbonnementPage() {
 
       <PageHeader
         title="Abonnement"
-        description="Revia se rentabilise dès la première cliente récupérée."
+        description="Revia se rentabilise dès le premier client récupéré."
       />
 
       {!stripeOn ? (

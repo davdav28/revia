@@ -44,7 +44,7 @@ export function ServiceForm({
         <Input
           id="name"
           name="name"
-          placeholder="Pose semi-permanent"
+          placeholder="Coupe, soin, pose…"
           defaultValue={defaultValues.name}
           aria-invalid={!!fe.name}
           required
@@ -75,7 +75,7 @@ export function ServiceForm({
             defaultValue={defaultValues.intervalDays}
           />
           <p className="text-muted text-xs">
-            Au bout de combien de jours la cliente devrait revenir. Laissez vide
+            Au bout de combien de jours le client devrait revenir. Laissez vide
             pour une prestation ponctuelle.
           </p>
         </div>

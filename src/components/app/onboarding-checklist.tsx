@@ -30,7 +30,7 @@ export function OnboardingChecklist({ steps }: { steps: OnboardingStep[] }) {
         </span>
       </div>
       <p className="text-muted mt-1 text-sm">
-        Trois étapes pour que Revia commence à vous ramener des clientes.
+        Trois étapes pour que Revia commence à vous ramener des clients.
       </p>
 
       <ol className="mt-4 space-y-2">

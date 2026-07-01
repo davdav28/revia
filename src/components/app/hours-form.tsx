@@ -127,7 +127,7 @@ export function HoursForm({
       </div>
 
       <p className="text-muted text-sm">
-        Vos clientes ne pourront réserver que sur ces jours et entre ces heures.
+        Vos clients ne pourront réserver que sur ces jours et entre ces heures.
       </p>
 
       <Button onClick={save} disabled={isPending || days.length === 0}>

@@ -6,7 +6,7 @@ import { ClientForm } from "@/components/app/client-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/server/clients";
 
-export const metadata: Metadata = { title: "Ajouter une cliente" };
+export const metadata: Metadata = { title: "Ajouter un client" };
 
 export default function NouvelleClientePage() {
   return (
@@ -16,10 +16,10 @@ export default function NouvelleClientePage() {
         className="text-muted hover:text-ink inline-flex items-center gap-1.5 text-sm"
       >
         <ArrowLeft className="size-4" />
-        Retour aux clientes
+        Retour aux clients
       </Link>
       <PageHeader
-        title="Ajouter une cliente"
+        title="Ajouter un client"
         description="Renseignez ses informations. Vous pourrez les modifier plus tard."
       />
       <Card>
@@ -27,7 +27,7 @@ export default function NouvelleClientePage() {
           <ClientForm
             action={createClient}
             showFirstVisit
-            submitLabel="Ajouter la cliente"
+            submitLabel="Ajouter le client"
           />
         </CardContent>
       </Card>

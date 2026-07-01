@@ -28,7 +28,7 @@ export function TrialBanner({
               ? `Bravo — vous avez déjà récupéré ${formatCents(trial.recoveredCents)} ! `
               : ""}
             Choisissez une formule pour que Revia continue de relancer vos
-            clientes.{" "}
+            clients.{" "}
             <Link href="/reglages/abonnement" className="font-medium underline">
               Voir les formules
             </Link>

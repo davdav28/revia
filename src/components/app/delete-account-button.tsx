@@ -29,7 +29,7 @@ export function DeleteAccountButton() {
       </DialogTrigger>
       <DialogContent
         title="Supprimer définitivement votre compte"
-        description="Toutes vos données (clientes, rendez-vous, messages) seront effacées. Cette action est irréversible."
+        description="Toutes vos données (clients, rendez-vous, messages) seront effacées. Cette action est irréversible."
       >
         <div className="space-y-4">
           <div className="space-y-1.5">

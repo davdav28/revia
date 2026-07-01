@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatRelative, formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 
-export const metadata: Metadata = { title: "Fiche cliente" };
+export const metadata: Metadata = { title: "Fiche client" };
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -45,7 +45,7 @@ export default async function ClientePage({
         className="text-muted hover:text-ink inline-flex items-center gap-1.5 text-sm"
       >
         <ArrowLeft className="size-4" />
-        Retour aux clientes
+        Retour aux clients
       </Link>
 
       <div className="flex items-start justify-between gap-4">

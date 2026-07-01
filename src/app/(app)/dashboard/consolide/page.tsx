@@ -93,8 +93,8 @@ export default async function ConsolidatedDashboardPage() {
           />
         </div>
         <p className="text-muted mt-4 max-w-2xl">
-          {totalReactivations30} cliente{totalReactivations30 > 1 ? "s" : ""}{" "}
-          réactivée{totalReactivations30 > 1 ? "s" : ""} sur 30 jours, tous
+          {totalReactivations30} client{totalReactivations30 > 1 ? "s" : ""}{" "}
+          réactivé{totalReactivations30 > 1 ? "s" : ""} sur 30 jours, tous
           salons confondus · {totalDormant} encore à relancer.
         </p>
       </div>
@@ -117,7 +117,7 @@ export default async function ConsolidatedDashboardPage() {
                 À relancer
               </th>
               <th className="text-muted px-5 py-3 text-right text-xs font-semibold tracking-wider uppercase">
-                Clientes
+                Clients
               </th>
             </tr>
           </thead>

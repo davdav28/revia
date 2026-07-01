@@ -93,7 +93,7 @@ export function ClientForm({
             id="email"
             name="email"
             type="email"
-            placeholder="cliente@email.fr"
+            placeholder="client@email.fr"
             defaultValue={defaultValues.email}
             aria-invalid={!!fe.email}
           />

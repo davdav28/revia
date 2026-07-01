@@ -5,7 +5,7 @@ import { requireMember } from "@/lib/auth";
 import { PageHeader } from "@/components/app/page-header";
 import { ImportWizard } from "./import-wizard";
 
-export const metadata: Metadata = { title: "Importer des clientes" };
+export const metadata: Metadata = { title: "Importer des clients" };
 
 export default async function ImportPage() {
   await requireMember();
@@ -17,10 +17,10 @@ export default async function ImportPage() {
         className="text-muted hover:text-ink inline-flex items-center gap-1.5 text-sm"
       >
         <ArrowLeft className="size-4" />
-        Retour aux clientes
+        Retour aux clients
       </Link>
       <PageHeader
-        title="Importer votre fichier clientes"
+        title="Importer votre fichier clients"
         description="Un fichier CSV avec une ligne d'en-têtes. Vous associerez ensuite vos colonnes et vérifierez l'aperçu avant l'import."
       />
       <ImportWizard />
@@ -38,7 +38,7 @@ export default async function ImportPage() {
           </p>
           <p className="text-muted text-sm">
             Importez l'export Planity, Treatwell ou Fresha — Revia reconstitue
-            les visites et repère les clientes à relancer.
+            les visites et repère les clients à relancer.
           </p>
         </div>
         <ChevronRight className="text-muted size-5 shrink-0" />

@@ -127,7 +127,7 @@ export default async function ReglagesPage() {
             <div className="flex-1">
               <CardTitle className="text-base">Horaires d'ouverture</CardTitle>
               <CardDescription>
-                Jours et heures où vos clientes peuvent réserver
+                Jours et heures où vos clients peuvent réserver
               </CardDescription>
             </div>
             <ChevronRight className="text-muted size-5" />

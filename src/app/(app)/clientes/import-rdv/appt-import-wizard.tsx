@@ -28,7 +28,7 @@ type Field = { key: Key; label: string; hint?: string; synonyms: string[] };
 const FIELDS: Field[] = [
   {
     key: "fullName",
-    label: "Nom complet de la cliente",
+    label: "Nom complet du client",
     hint: "si prénom/nom ne sont pas séparés",
     synonyms: ["client", "cliente", "nom complet", "name", "customer", "contact"],
   },
@@ -186,7 +186,7 @@ export function ApptImportWizard() {
               {result.appointmentsCreated} rendez-vous importé
               {result.appointmentsCreated > 1 ? "s" : ""}
               {result.clientsCreated > 0 &&
-                ` · ${result.clientsCreated} nouvelle${result.clientsCreated > 1 ? "s" : ""} cliente${result.clientsCreated > 1 ? "s" : ""}`}
+                ` · ${result.clientsCreated} nouveau${result.clientsCreated > 1 ? "x" : ""} client${result.clientsCreated > 1 ? "s" : ""}`}
               {result.duplicates > 0 &&
                 ` · ${result.duplicates} déjà connu${result.duplicates > 1 ? "s" : ""}`}
               {result.skipped > 0 &&
@@ -214,7 +214,7 @@ export function ApptImportWizard() {
 
           <div className="flex justify-center gap-2">
             <Button asChild>
-              <Link href="/clientes">Voir mes clientes</Link>
+              <Link href="/clientes">Voir mes clients</Link>
             </Button>
             <Button variant="secondary" asChild>
               <Link href="/dashboard">Voir le tableau de bord</Link>
@@ -379,7 +379,7 @@ export function ApptImportWizard() {
             ) : null}
 
             <p className="text-muted text-xs">
-              Les clientes sont rapprochées par téléphone, email, puis nom. Les
+              Les clients sont rapprochés par téléphone, email, puis nom. Les
               statuts (dont « à relancer ») sont recalculés après l'import.
             </p>
 

@@ -24,7 +24,7 @@ export default async function HorairesPage() {
 
       <PageHeader
         title="Horaires d'ouverture"
-        description="Définissez quand vos clientes peuvent réserver en ligne."
+        description="Définissez quand vos clients peuvent réserver en ligne."
       />
 
       <Card>

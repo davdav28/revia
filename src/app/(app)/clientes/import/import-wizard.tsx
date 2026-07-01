@@ -174,7 +174,7 @@ export function ImportWizard() {
       setResult(summary);
       if (summary.created > 0) {
         toast.success(
-          `${summary.created} cliente${summary.created > 1 ? "s" : ""} importée${summary.created > 1 ? "s" : ""}.`,
+          `${summary.created} client${summary.created > 1 ? "s" : ""} importé${summary.created > 1 ? "s" : ""}.`,
         );
         router.refresh();
       }
@@ -221,7 +221,7 @@ export function ImportWizard() {
           ) : null}
 
           <Button asChild>
-            <Link href="/clientes">Voir mes clientes</Link>
+            <Link href="/clientes">Voir mes clients</Link>
           </Button>
         </CardContent>
       </Card>
@@ -243,7 +243,7 @@ export function ImportWizard() {
             </span>
             <span className="text-ink font-medium">Choisir un fichier CSV</span>
             <span className="text-muted max-w-sm text-sm">
-              Exportez votre fichier clientes depuis votre logiciel de caisse ou
+              Exportez votre fichier clients depuis votre logiciel de caisse ou
               un tableur, au format CSV. Une première ligne d'en-têtes est
               attendue (Prénom, Nom, Téléphone…).
             </span>
@@ -341,7 +341,7 @@ export function ImportWizard() {
         <Card>
           <CardContent className="space-y-3 pt-6">
             <p className="text-ink font-medium">
-              Aperçu ({usableRows.length} cliente
+              Aperçu ({usableRows.length} client
               {usableRows.length > 1 ? "s" : ""} à importer)
             </p>
             <div className="border-line overflow-hidden rounded-lg border">
@@ -380,7 +380,7 @@ export function ImportWizard() {
               >
                 {isPending
                   ? "Import en cours…"
-                  : `Importer ${usableRows.length} cliente${usableRows.length > 1 ? "s" : ""}`}
+                  : `Importer ${usableRows.length} client${usableRows.length > 1 ? "s" : ""}`}
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="/clientes">Annuler</Link>

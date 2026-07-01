@@ -39,7 +39,7 @@ export default async function ServicesPage() {
 
       <PageHeader
         title="Prestations"
-        description="Vos soins, leur prix et leur cycle de retour. Le cycle sert à repérer les clientes en retard."
+        description="Vos soins, leur prix et leur cycle de retour. Le cycle sert à repérer les clients en retard."
         actions={
           services.length > 0 ? (
             <Button size="sm" asChild>
@@ -56,7 +56,7 @@ export default async function ServicesPage() {
         <EmptyState
           icon={Sparkle}
           title="Aucune prestation pour l'instant"
-          description="Démarrez avec les prestations onglerie types (pose gel, semi-permanent, remplissage, nail art, dépose), puis ajustez prix et cycles."
+          description="Démarrez avec les prestations pré-remplies selon votre métier, puis ajustez prix et cycles."
           action={
             <div className="flex flex-col gap-2 sm:flex-row">
               <form action={seedDefaultServices}>
