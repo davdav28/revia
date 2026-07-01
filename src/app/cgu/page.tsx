@@ -37,10 +37,12 @@ export default function CguPage() {
           dans la limite d'un plafond fixé par le Client.
         </p>
         <p>
-          Un essai gratuit est proposé (limité à {SUBSCRIPTION.trial.days} jours
-          ou {SUBSCRIPTION.trial.recoveredEurosTarget} € de chiffre d'affaires
-          récupéré, au premier des deux). L'abonnement est sans engagement,
-          résiliable à tout moment ; il reste actif jusqu'à la fin de la période
+          Un essai gratuit de {SUBSCRIPTION.trial.days} jours est proposé. Une
+          carte bancaire est demandée à l'inscription ; aucun débit n'a lieu
+          pendant l'essai. À l'issue de l'essai, l'abonnement démarre
+          automatiquement selon la formule choisie, sauf résiliation.
+          L'abonnement est sans engagement, résiliable à tout moment depuis
+          l'espace du Client ; il reste actif jusqu'à la fin de la période
           en cours. Les paiements sont opérés par Stripe.
         </p>
       </Section>

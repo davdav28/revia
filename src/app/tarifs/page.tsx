@@ -11,7 +11,7 @@ import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 export const metadata: Metadata = {
   title: "Tarifs",
   description:
-    "Trois formules simples pour réactiver vos clientes. Vous payez le volume, pas les fonctionnalités. Gratuit jusqu'à 100 € de CA récupéré.",
+    "Trois formules simples pour réactiver vos clientes. Vous payez le volume, pas les fonctionnalités. Essai gratuit de 30 jours, sans engagement.",
 };
 
 export default function TarifsPage() {

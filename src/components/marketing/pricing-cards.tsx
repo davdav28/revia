@@ -199,12 +199,12 @@ export function PricingCards() {
 
       <p className="text-muted mx-auto max-w-xl text-center text-sm">
         <span className="text-ink font-semibold">
-          Gratuit jusqu'à{" "}
-          {formatCents(SUBSCRIPTION.trial.recoveredEurosTarget * 100)} de chiffre
-          d'affaires récupéré
+          {SUBSCRIPTION.trial.days} jours d'essai gratuit
         </span>
-        , ou {SUBSCRIPTION.trial.days} jours d'essai — le premier des deux. Vous
-        ne payez Revia que quand il vous a déjà rapporté.
+        , sans engagement — résiliable à tout moment. La plupart des salons
+        récupèrent leurs premiers{" "}
+        {formatCents(SUBSCRIPTION.trial.recoveredEurosTarget * 100)} avant la fin
+        de l'essai.
       </p>
     </div>
   );
