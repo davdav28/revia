@@ -84,50 +84,42 @@ export async function createCustomMultiCheckout(input: {
   const multi = getPlan("multi");
   if (!multi) return { error: "Plan Multi introuvable." };
 
-  // Client Stripe (réutilise celui du salon si déjà créé).
-  let customerId = salon.stripeCustomerId;
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email,
-      name: salon.name,
-      metadata: { salonId: salon.id },
-    });
-    customerId = customer.id;
-    await prisma.salon.update({
-      where: { id: salon.id },
-      data: { stripeCustomerId: customerId },
-    });
-  }
-
-  // On mémorise les overrides sur le salon : ils s'appliqueront dès que le
-  // paiement fait passer le salon en actif (l'essai/incomplet les ignore).
-  await prisma.salon.update({
-    where: { id: salon.id },
-    data: { customSmsQuota: includedSms, customOverageCents: overageCents },
-  });
-
   const interval = period === "annual" ? "year" : "month";
 
-  // Prix ad-hoc (sur-mesure) : pas besoin de créer un objet Price au préalable.
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    {
-      price_data: {
-        currency: "eur",
-        unit_amount: Math.round(amount * 100),
-        recurring: { interval },
-        product_data: { name: `${BRAND.name} Multi — offre sur-mesure` },
-      },
-      quantity: 1,
-    },
-  ];
+  try {
+    // Client Stripe (réutilise celui du salon si déjà créé).
+    let customerId = salon.stripeCustomerId;
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: salon.name,
+        metadata: { salonId: salon.id },
+      });
+      customerId = customer.id;
+      await prisma.salon.update({
+        where: { id: salon.id },
+        data: { stripeCustomerId: customerId },
+      });
+    }
 
-  // Facturation du dépassement (metered).
-  const meterPriceId = process.env[multi.meterPriceEnvKey]?.trim();
-  if (meterPriceId) {
-    if (overageCents !== null) {
-      // Prix du surplus sur-mesure : on calque un prix metered sur le compteur
-      // Stripe existant (même compteur/produit), avec le tarif négocié.
-      try {
+    // Prix de base : un vrai objet Price (plus fiable qu'un price_data inline
+    // lorsqu'on le combine à un prix « metered » dans un même abonnement).
+    const basePrice = await stripe.prices.create({
+      currency: "eur",
+      unit_amount: Math.round(amount * 100),
+      recurring: { interval },
+      product_data: { name: `${BRAND.name} Multi — offre sur-mesure` },
+    });
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      { price: basePrice.id, quantity: 1 },
+    ];
+
+    // Facturation du dépassement (metered).
+    const meterPriceId = process.env[multi.meterPriceEnvKey]?.trim();
+    if (meterPriceId) {
+      if (overageCents !== null) {
+        // Prix du surplus sur-mesure : on calque un prix metered sur le
+        // compteur Stripe existant (même compteur/produit), au tarif négocié.
         const base = await stripe.prices.retrieve(meterPriceId);
         const meterId =
           typeof base.recurring?.meter === "string"
@@ -140,39 +132,45 @@ export async function createCustomMultiCheckout(input: {
           unit_amount: overageCents,
           nickname: `Surplus SMS sur-mesure — ${overageCents} c`,
           product: productId,
-          recurring: {
-            interval,
-            usage_type: "metered",
-            ...(meterId ? { meter: meterId } : {}),
-          },
+          recurring: meterId
+            ? { interval, meter: meterId }
+            : { interval, usage_type: "metered" },
         });
         lineItems.push({ price: customMeterPrice.id });
-      } catch {
-        // Repli : à défaut, on facture le surplus au tarif standard du plan.
+      } else {
         lineItems.push({ price: meterPriceId });
       }
-    } else {
-      lineItems.push({ price: meterPriceId });
     }
-  }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: lineItems,
-    success_url: `${appUrl()}/reglages/abonnement?success=1`,
-    cancel_url: `${appUrl()}/reglages/abonnement?canceled=1`,
-    metadata: { salonId: salon.id, plan: "multi", period },
-    subscription_data: {
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: lineItems,
+      success_url: `${appUrl()}/reglages/abonnement?success=1`,
+      cancel_url: `${appUrl()}/reglages/abonnement?canceled=1`,
       metadata: { salonId: salon.id, plan: "multi", period },
-    },
-  });
+      subscription_data: {
+        metadata: { salonId: salon.id, plan: "multi", period },
+      },
+    });
 
-  if (!session.url) return { error: "Impossible de générer le lien." };
-  return {
-    url: session.url,
-    salonName: salon.name,
-    includedSms: includedSms ?? multi.smsQuota,
-    overageCents: overageCents ?? multi.overageCents,
-  };
+    if (!session.url) return { error: "Impossible de générer le lien." };
+
+    // Overrides mémorisés seulement une fois le lien créé avec succès.
+    await prisma.salon.update({
+      where: { id: salon.id },
+      data: { customSmsQuota: includedSms, customOverageCents: overageCents },
+    });
+
+    return {
+      url: session.url,
+      salonName: salon.name,
+      includedSms: includedSms ?? multi.smsQuota,
+      overageCents: overageCents ?? multi.overageCents,
+    };
+  } catch (e) {
+    // On ne laisse jamais l'exception faire planter la page : on la remonte.
+    const msg = e instanceof Error ? e.message : "erreur inconnue";
+    return { error: `Stripe : ${msg}` };
+  }
 }
