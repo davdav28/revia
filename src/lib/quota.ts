@@ -10,6 +10,8 @@ export type QuotaSalon = Pick<
   | "rechargeSegments"
   | "overageCapCents"
   | "quotaPeriodStart"
+  | "customSmsQuota"
+  | "customOverageCents"
 >;
 
 export type QuotaStatus = {
@@ -71,9 +73,11 @@ export function getQuotaStatus(salon: QuotaSalon): QuotaStatus {
     };
   }
 
-  const included = plan.smsQuota + (salon.rechargeSegments ?? 0);
+  // Offre sur-mesure : les overrides du salon priment sur les valeurs du plan.
+  const baseQuota = salon.customSmsQuota ?? plan.smsQuota;
+  const included = baseQuota + (salon.rechargeSegments ?? 0);
   const used = salon.smsUsedThisPeriod ?? 0;
-  const overageCents = plan.overageCents;
+  const overageCents = salon.customOverageCents ?? plan.overageCents;
   const overageCapCents =
     salon.overageCapCents ?? SUBSCRIPTION.defaultOverageCapCents;
   const overageCapSegments =

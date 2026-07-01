@@ -95,6 +95,10 @@ model Salon {
   overageCapCents   Int       @default(3000) // plafond de dépassement mensuel (défaut 30 €)
   quotaAlertSent    Boolean   @default(false) // alerte 80 % déjà envoyée pour cette période
 
+  // Offre sur-mesure (abonnement Multi négocié). Null = valeurs du plan standard.
+  customSmsQuota    Int? // SMS inclus / mois (remplace plan.smsQuota)
+  customOverageCents Int? // prix du SMS au-delà du quota, en centimes (remplace plan.overageCents)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

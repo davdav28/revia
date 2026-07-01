@@ -12,13 +12,18 @@ import type { BillingPeriod } from "@/config/brand";
 export function CustomPriceForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ url: string; salonName: string } | null>(
-    null,
-  );
+  const [result, setResult] = useState<{
+    url: string;
+    salonName: string;
+    includedSms: number;
+    overageCents: number;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
+  const [includedSms, setIncludedSms] = useState("");
+  const [overageCents, setOverageCents] = useState("");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,6 +34,8 @@ export function CustomPriceForm() {
         email,
         amountEuros: Number(amount),
         period,
+        includedSms: includedSms === "" ? null : Number(includedSms),
+        overageCents: overageCents === "" ? null : Number(overageCents),
       });
       if ("error" in res) {
         setError(res.error);
@@ -104,6 +111,31 @@ export function CustomPriceForm() {
         </div>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="a-sms">SMS inclus / mois</Label>
+          <Input
+            id="a-sms"
+            inputMode="numeric"
+            value={includedSms}
+            onChange={(e) => setIncludedSms(e.target.value)}
+            placeholder="1500 (standard)"
+          />
+          <p className="text-muted text-xs">Vide = 1500 (plan Multi).</p>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="a-overage">Prix du surplus (centimes / SMS)</Label>
+          <Input
+            id="a-overage"
+            inputMode="numeric"
+            value={overageCents}
+            onChange={(e) => setOverageCents(e.target.value)}
+            placeholder="10 (standard)"
+          />
+          <p className="text-muted text-xs">Vide = 10 c (0,10 €).</p>
+        </div>
+      </div>
+
       <Button type="submit" disabled={isPending}>
         {isPending ? "Génération…" : "Générer le lien de paiement"}
       </Button>
@@ -112,6 +144,11 @@ export function CustomPriceForm() {
         <div className="border-line bg-surface space-y-3 rounded-xl border p-4">
           <p className="text-ink text-sm font-medium">
             Lien prêt pour « {result.salonName} »
+          </p>
+          <p className="text-muted text-xs">
+            {result.includedSms.toLocaleString("fr-FR")} SMS inclus / mois ·
+            surplus {(result.overageCents / 100).toFixed(2).replace(".", ",")} €
+            / SMS
           </p>
           <div className="flex items-center gap-2">
             <Input
