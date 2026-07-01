@@ -4,6 +4,7 @@ import type {
   SmsParams,
   EmailParams,
 } from "./types";
+import { toSmsRecipient } from "@/lib/phone-format";
 
 const BREVO_API = "https://api.brevo.com/v3";
 
@@ -31,7 +32,7 @@ export class BrevoProvider implements MessagingProvider {
         body: JSON.stringify({
           type: "marketing",
           sender: p.sender.slice(0, 11),
-          recipient: p.to,
+          recipient: toSmsRecipient(p.to),
           content: p.body,
           unicodeEnabled: true,
         }),
