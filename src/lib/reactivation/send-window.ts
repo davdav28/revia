@@ -3,7 +3,10 @@
  * (heure du salon). Les meilleurs taux sont mardi-jeudi 9-11h / 17-19h, mais on
  * n'interdit pas les autres créneaux ouvrés.
  */
-function hourInTz(now: Date, tz: string): { hour: number; weekday: number } {
+export function hourInTz(
+  now: Date,
+  tz: string,
+): { hour: number; weekday: number } {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
     hour: "2-digit",

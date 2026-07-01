@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { recomputeManyClientStats } from "@/lib/client-stats";
 import { getMessagingProvider, type MessagingProvider } from "@/lib/messaging";
 import { renderTemplate, scenarioFor } from "@/lib/templates";
-import { isWithinSendWindow } from "./send-window";
+import { isWithinSendWindow, hourInTz } from "./send-window";
 import { optOutUrl } from "@/lib/opt-out";
 import { bookingUrl } from "@/lib/slug";
 import { isSubscriptionActive } from "@/lib/subscription";
@@ -483,14 +483,30 @@ async function sendQuotaAlert(
   });
 }
 
-/** Lance le scan pour tous les salons (cron quotidien). */
+/** Heure de déclenchement d'un salon = son ouverture, bornée à la fenêtre 9-19h. */
+function salonScanHour(openFromHour: number): number {
+  return Math.min(Math.max(openFromHour, 9), 19);
+}
+
+/**
+ * Lance le scan pour tous les salons (cron horaire). Chaque salon n'est traité
+ * qu'à SON heure d'ouverture (dans son fuseau) → une fois par jour, pile à
+ * l'ouverture. `force` (ou `now` de test) contourne ce filtre.
+ */
 export async function runScanAllSalons(
-  opts: { force?: boolean } = {},
+  opts: { force?: boolean; now?: Date } = {},
 ): Promise<ScanSummary[]> {
-  const salons = await prisma.salon.findMany({ select: { id: true } });
+  const now = opts.now ?? new Date();
+  const salons = await prisma.salon.findMany({
+    select: { id: true, openFromHour: true, timezone: true },
+  });
   const results: ScanSummary[] = [];
   for (const s of salons) {
-    results.push(await runScanForSalon(s.id, opts));
+    if (!opts.force) {
+      const { hour } = hourInTz(now, s.timezone);
+      if (hour !== salonScanHour(s.openFromHour)) continue;
+    }
+    results.push(await runScanForSalon(s.id, { force: opts.force, now }));
   }
   return results;
 }
