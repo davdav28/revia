@@ -4,6 +4,7 @@ import { ArrowLeft, Mail, Phone } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app/page-header";
+import { ContactReply } from "@/components/admin/contact-reply";
 import { formatDate } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "Prospects & contacts" };
@@ -70,6 +71,12 @@ export default async function AdminContactsPage() {
               <p className="text-muted mt-3 text-sm whitespace-pre-line">
                 {m.message}
               </p>
+              <ContactReply
+                id={m.id}
+                name={m.name}
+                repliedAt={m.repliedAt ? m.repliedAt.toISOString() : null}
+                lastReply={m.reply}
+              />
             </div>
           ))}
         </div>

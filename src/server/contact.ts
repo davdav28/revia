@@ -1,6 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { contactSchema } from "@/lib/validations/contact";
 import { getMessagingProvider } from "@/lib/messaging";
 import { ticketRef } from "@/lib/ticket";
@@ -8,6 +10,40 @@ import { LEGAL } from "@/config/legal";
 import { BRAND } from "@/config/brand";
 
 export type ContactResult = { ok: true; ref: string } | { error: string };
+
+/** Répond à un prospect par email, depuis l'espace fondateur. */
+export async function replyToContact(
+  id: string,
+  body: string,
+): Promise<{ ok: true } | { error: string }> {
+  await requireAdmin();
+  const text = body.trim();
+  if (text.length < 2) return { error: "Écrivez une réponse." };
+
+  const msg = await prisma.contactMessage.findUnique({ where: { id } });
+  if (!msg) return { error: "Message introuvable." };
+
+  try {
+    const provider = getMessagingProvider();
+    await provider.sendEmail({
+      to: msg.email,
+      subject: `Re : votre message à ${BRAND.name}`,
+      html: `<div><p>Bonjour ${msg.name},</p><div>${text.replace(/\n/g, "<br>")}</div><p style="margin-top:24px;color:#6b5d67;font-size:12px">— L'équipe ${BRAND.name}</p></div>`,
+      senderEmail: process.env.BREVO_EMAIL_SENDER ?? LEGAL.contactEmail,
+      senderName: BRAND.name,
+      replyTo: { email: LEGAL.contactEmail, name: BRAND.name },
+    });
+  } catch {
+    return { error: "L'envoi a échoué. Réessayez." };
+  }
+
+  await prisma.contactMessage.update({
+    where: { id },
+    data: { reply: text, repliedAt: new Date() },
+  });
+  revalidatePath("/admin/contacts");
+  return { ok: true };
+}
 
 /** Envoi du formulaire de contact public (« Parler à l'équipe »). */
 export async function submitContact(input: {
