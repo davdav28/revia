@@ -9,6 +9,7 @@ import { SUBSCRIPTION_STATUS_LABEL } from "@/lib/subscription";
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { PageHeader } from "@/components/app/page-header";
+import { TrendChart } from "@/components/admin/trend-chart";
 
 export const metadata: Metadata = { title: "Espace fondateur" };
 
@@ -182,6 +183,42 @@ export default async function AdminPage() {
     .map(([k, count]) => ({ label: METIER_LABEL[k] ?? k, count }))
     .sort((a, b) => b.count - a.count);
 
+  // Tendances des 6 derniers mois (dérivées des dates existantes).
+  const now = new Date();
+  const months = Array.from({ length: 6 }, (_, k) => {
+    const i = 5 - k;
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    return {
+      start,
+      end,
+      label: new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(start),
+    };
+  });
+  const trend = await Promise.all(
+    months.map(async (m) => {
+      const [signups, rec, sms] = await Promise.all([
+        prisma.salon.count({
+          where: { createdAt: { gte: m.start, lt: m.end } },
+        }),
+        prisma.recovery.aggregate({
+          where: { recoveredAt: { gte: m.start, lt: m.end } },
+          _sum: { recoveredAmountCents: true },
+        }),
+        prisma.message.aggregate({
+          where: { channel: "sms", createdAt: { gte: m.start, lt: m.end } },
+          _sum: { segments: true },
+        }),
+      ]);
+      return {
+        label: m.label,
+        signups,
+        recovered: rec._sum.recoveredAmountCents ?? 0,
+        sms: sms._sum.segments ?? 0,
+      };
+    }),
+  );
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -225,6 +262,30 @@ export default async function AdminPage() {
           total={total}
         />
         <Breakdown title="Répartition par métier" rows={metierRows} total={total} />
+      </div>
+
+      {/* Tendances */}
+      <div>
+        <h2 className="text-muted mb-3 text-xs font-semibold tracking-wide uppercase">
+          Tendances · 6 derniers mois
+        </h2>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <TrendChart
+            title="Inscriptions / mois"
+            points={trend.map((t) => ({ label: t.label, value: t.signups }))}
+            format={(n) => String(n)}
+          />
+          <TrendChart
+            title="CA récupéré / mois"
+            points={trend.map((t) => ({ label: t.label, value: t.recovered }))}
+            format={formatCents}
+          />
+          <TrendChart
+            title="SMS envoyés / mois"
+            points={trend.map((t) => ({ label: t.label, value: t.sms }))}
+            format={(n) => n.toLocaleString("fr-FR")}
+          />
+        </div>
       </div>
 
       {/* Derniers inscrits */}
