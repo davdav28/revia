@@ -9,6 +9,9 @@ import { ClientForm } from "@/components/app/client-form";
 import { ClientStatusBadge } from "@/components/app/client-status-badge";
 import { DeleteClientButton } from "@/components/app/delete-client-button";
 import { OptOutToggle } from "@/components/app/opt-out-toggle";
+import { SendMessageDialog } from "@/components/reactivation/send-message-dialog";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatRelative, formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
@@ -38,6 +41,19 @@ export default async function ClientePage({
 
   const fullName = `${client.firstName} ${client.lastName ?? ""}`.trim();
 
+  const templates = await prisma.messageTemplate.findMany({
+    where: { salonId: member.salonId, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      channel: true,
+      scenario: true,
+      subject: true,
+      body: true,
+    },
+    orderBy: { name: "asc" },
+  });
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Link
@@ -57,10 +73,26 @@ export default async function ClientePage({
             <ClientStatusBadge status={client.status} />
           </div>
         </div>
-        <DeleteClientButton
-          action={deleteClient.bind(null, client.id)}
-          clientName={fullName}
-        />
+        <div className="flex items-center gap-2">
+          {templates.length > 0 ? (
+            <SendMessageDialog
+              mode="client"
+              clientId={client.id}
+              clientName={fullName}
+              templates={templates}
+              trigger={
+                <Button variant="secondary" size="sm">
+                  <Send className="size-4" />
+                  Envoyer un message
+                </Button>
+              }
+            />
+          ) : null}
+          <DeleteClientButton
+            action={deleteClient.bind(null, client.id)}
+            clientName={fullName}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

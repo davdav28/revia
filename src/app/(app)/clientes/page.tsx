@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app/page-header";
 import { ClientsToolbar } from "@/components/app/clients-toolbar";
 import { ClientStatusBadge } from "@/components/app/client-status-badge";
+import { SendMessageDialog } from "@/components/reactivation/send-message-dialog";
+import { Send } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +62,28 @@ export default async function ClientesPage({
   ]);
 
   const exportQuery = toFilterQuery(sp);
+  const segmentFilter: ClientFilterParams = {
+    q: sp.q,
+    status: sp.status,
+    reachable: sp.reachable,
+    loyalty: sp.loyalty,
+    spend: sp.spend,
+  };
+  const templates =
+    totalCount > 0
+      ? await prisma.messageTemplate.findMany({
+          where: { salonId: member.salonId, isActive: true },
+          select: {
+            id: true,
+            name: true,
+            channel: true,
+            scenario: true,
+            subject: true,
+            body: true,
+          },
+          orderBy: { name: "asc" },
+        })
+      : [];
 
   const actions = (
     <>
@@ -134,14 +158,30 @@ export default async function ClientesPage({
               )}
             </p>
             {filteredCount > 0 ? (
-              <Button variant="secondary" size="sm" asChild>
-                <a
-                  href={`/api/clients/segment/export${exportQuery ? `?${exportQuery}` : ""}`}
-                >
-                  <Download className="size-4" />
-                  Exporter ce segment (CSV)
-                </a>
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {templates.length > 0 ? (
+                  <SendMessageDialog
+                    mode="segment"
+                    filter={segmentFilter}
+                    count={filteredCount}
+                    templates={templates}
+                    trigger={
+                      <Button size="sm">
+                        <Send className="size-4" />
+                        Envoyer à ce segment
+                      </Button>
+                    }
+                  />
+                ) : null}
+                <Button variant="secondary" size="sm" asChild>
+                  <a
+                    href={`/api/clients/segment/export${exportQuery ? `?${exportQuery}` : ""}`}
+                  >
+                    <Download className="size-4" />
+                    Exporter (CSV)
+                  </a>
+                </Button>
+              </div>
             ) : null}
           </div>
 

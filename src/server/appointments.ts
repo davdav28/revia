@@ -7,6 +7,7 @@ import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { recomputeClientStats } from "@/lib/client-stats";
 import { parseEurosToCents } from "@/lib/money";
+import { offerFreedSlot } from "@/lib/reactivation/freed-slot";
 
 export type AppointmentActionResult = { ok: true } | { error: string };
 
@@ -82,7 +83,7 @@ export async function updateAppointment(
   const member = await requireMember();
   const existing = await prisma.appointment.findFirst({
     where: { id, salonId: member.salonId },
-    select: { id: true, clientId: true },
+    select: { id: true, clientId: true, status: true },
   });
   if (!existing) return { error: "Rendez-vous introuvable." };
 
@@ -113,6 +114,13 @@ export async function updateAppointment(
   });
 
   await recomputeClientStats(existing.clientId);
+  // RDV annulé (nouveau) → on propose le créneau libéré à des dormants.
+  if (d.status === "cancelled" && existing.status !== "cancelled") {
+    await offerFreedSlot(member.salonId, {
+      startAt: new Date(d.startAtISO),
+      clientId: existing.clientId,
+    }).catch(() => {});
+  }
   revalidatePath("/agenda");
   revalidatePath("/clientes");
   revalidatePath("/dashboard");
@@ -127,12 +135,18 @@ export async function setAppointmentStatus(
   const member = await requireMember();
   const existing = await prisma.appointment.findFirst({
     where: { id, salonId: member.salonId },
-    select: { id: true, clientId: true },
+    select: { id: true, clientId: true, status: true, startAt: true },
   });
   if (!existing) return { error: "Rendez-vous introuvable." };
 
   await prisma.appointment.update({ where: { id }, data: { status } });
   await recomputeClientStats(existing.clientId);
+  if (status === "cancelled" && existing.status !== "cancelled") {
+    await offerFreedSlot(member.salonId, {
+      startAt: existing.startAt,
+      clientId: existing.clientId,
+    }).catch(() => {});
+  }
   revalidatePath("/agenda");
   revalidatePath("/clientes");
   revalidatePath("/dashboard");
