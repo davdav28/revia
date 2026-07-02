@@ -75,7 +75,7 @@ export async function sendManualToSegment(
 export async function listSendableTemplates() {
   const member = await requireMember();
   return prisma.messageTemplate.findMany({
-    where: { salonId: member.salonId, isActive: true },
+    where: { salonId: member.salonId, isActive: true, trigger: null },
     select: {
       id: true,
       name: true,

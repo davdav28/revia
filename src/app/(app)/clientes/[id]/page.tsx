@@ -41,8 +41,10 @@ export default async function ClientePage({
 
   const fullName = `${client.firstName} ${client.lastName ?? ""}`.trim();
 
+  // Seuls les modèles « manuels » (trigger nul) : les modèles automatiques
+  // (rappel de cycle, dormante, anniversaire…) partent déjà via le scan.
   const templates = await prisma.messageTemplate.findMany({
-    where: { salonId: member.salonId, isActive: true },
+    where: { salonId: member.salonId, isActive: true, trigger: null },
     select: {
       id: true,
       name: true,

@@ -72,7 +72,8 @@ export default async function ClientesPage({
   const templates =
     totalCount > 0
       ? await prisma.messageTemplate.findMany({
-          where: { salonId: member.salonId, isActive: true },
+          // Modèles « manuels » uniquement (les automatiques partent via le scan).
+          where: { salonId: member.salonId, isActive: true, trigger: null },
           select: {
             id: true,
             name: true,
